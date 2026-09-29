@@ -45,17 +45,42 @@ canvas{width:100%;height:250px;border:2px dashed #c8d8da;border-radius:14px;back
 <div class="row"><div><label>Nom / Prénom</label><input id="name" autocomplete="name" placeholder="Jean Dupont"></div><div><label>Société</label><input id="company" placeholder="Entreprise"></div></div>
 <div class="row"><div><label>Téléphone</label><input id="phone" type="tel" placeholder="06 00 00 00 00"></div><div><label>E-mail</label><input id="email" type="email" placeholder="contact@entreprise.fr"></div></div>
 <label>Bateau / Projet</label><input id="project" placeholder="Catamaran, covering, décoration…">
-<div class="row"><div><label>Statut</label><select id="status"><option>Nouveau</option><option>À rappeler</option><option>Devis</option><option>En attente</option><option>Terminé</option></select></div><div><label>Rappel</label><input id="follow" type="date"></div></div>
-<label>Notes</label><textarea id="note" rows="3" placeholder="Demande du client, dimensions, idées…"></textarea>
+<div class="row"><div><label>Statut</label><select id="status">
+<option>À commander</option><option>À facturer</option><option>À encaisser</option>
+</select></div><div><label>Rappel</label><input id="follow" type="date"></div></div>
+<div class="card">
+<h2>📝 Note</h2>
+<div class="toolbar" style="margin-bottom:10px">
+  <button type="button" class="alt" id="noteKeyboardBtn">⌨️ Écrire au clavier</button>
+  <button type="button" class="alt" id="noteStylusBtn">✍️ Écrire au stylet</button>
 </div>
-<div class="card"><h2>✍️ Notes au stylet</h2><canvas id="pad"></canvas><div class="toolbar" style="margin-top:8px"><button class="alt" id="clear">Effacer</button></div></div>
-<div class="card"><h2>📸 Photos du projet</h2><input id="photo" type="file" accept="image/*" capture="environment" multiple><div id="photos" class="photos"></div></div>
+<div id="keyboardNoteBox">
+  <textarea id="note" rows="5" placeholder="Écris ta note avec le clavier…"></textarea>
+</div>
+<div id="stylusNoteBox" style="display:none">
+  <div class="muted" style="margin-bottom:8px">Écris avec l’Apple Pencil ou le doigt.</div>
+  <canvas id="pad"></canvas>
+  <div class="toolbar" style="margin-top:8px">
+    <button type="button" class="alt" id="clear">Effacer la note manuscrite</button>
+  </div>
+</div>
+</div>
+<canvas id="pad"></canvas>
+<div class="toolbar" style="margin-top:8px"><button class="alt" id="clear">Effacer la note manuscrite</button></div>
+</div>
+<div class="card"><h2>📸 Photos du projet</h2><div class="muted" style="margin-bottom:8px">Tu peux sélectionner plusieurs photos à la fois et en ajouter d’autres lors d’une modification.</div><input id="photo" type="file" accept="image/*" capture="environment" multiple><div id="photos" class="photos"></div><div id="photoHelp" class="muted" style="margin-top:8px"></div></div>
 <button class="orange" style="width:100%;margin-bottom:30px" id="save">💾 Enregistrer le contact</button>
 </section>
 
 <section id="list" class="view">
 <div class="top"><h2>Mes contacts</h2><button class="alt" id="back2">← Retour</button></div>
-<div class="card"><input class="search" id="search" placeholder="🔎 Rechercher un nom, société, bateau…"><div id="listbox"></div></div>
+<div class="card">
+<input class="search" id="search" placeholder="🔎 Rechercher un nom, société, bateau…">
+<select id="statusFilter" style="margin-bottom:10px">
+<option value="">Tous les statuts</option><option>À commander</option><option>À facturer</option><option>À encaisser</option>
+</select>
+<div id="listbox"></div>
+</div>
 </section>
 
 <section id="detail" class="view">
@@ -75,16 +100,44 @@ let down=false,x=0,y=0;
 pad.addEventListener('pointerdown',e=>{down=true;pad.setPointerCapture(e.pointerId);let r=pad.getBoundingClientRect();x=e.clientX-r.left;y=e.clientY-r.top});
 pad.addEventListener('pointermove',e=>{if(!down)return;let r=pad.getBoundingClientRect(),nx=e.clientX-r.left,ny=e.clientY-r.top;ctx.beginPath();ctx.moveTo(x,y);ctx.lineTo(nx,ny);ctx.stroke();x=nx;y=ny});
 ['pointerup','pointercancel'].forEach(t=>pad.addEventListener(t,()=>down=false));
+
+let noteMode='keyboard';
+function setNoteMode(mode){
+ noteMode=mode;
+ $('keyboardNoteBox').style.display=mode==='keyboard'?'block':'none';
+ $('stylusNoteBox').style.display=mode==='stylus'?'block':'none';
+ $('noteKeyboardBtn').className=mode==='keyboard'?'':'alt';
+ $('noteStylusBtn').className=mode==='stylus'?'':'alt';
+}
+$('noteKeyboardBtn').onclick=()=>setNoteMode('keyboard');
+$('noteStylusBtn').onclick=()=>setNoteMode('stylus');
+setNoteMode('keyboard');
 $('clear').onclick=()=>{ctx.clearRect(0,0,pad.width/scale,pad.height/scale)};
-$('photo').onchange=e=>{ $('photos').innerHTML='';[...e.target.files].forEach(f=>{let im=document.createElement('img');im.src=URL.createObjectURL(f);$('photos').appendChild(im)})};
+function renderPhotoList(){
+ const box=$('photos'); box.innerHTML='';
+ editingPhotos.forEach((src,i)=>{
+   const wrap=document.createElement('div'); wrap.style.position='relative';
+   wrap.innerHTML='<img src="'+src+'" style="width:100%;aspect-ratio:1;object-fit:cover;border-radius:12px"><button type="button" class="orange" style="position:absolute;right:5px;top:5px;min-height:34px;padding:5px 9px;border-radius:10px" onclick="deletePhoto('+i+')">✕</button>';
+   box.appendChild(wrap);
+ });
+ $('photoHelp').textContent=editingPhotos.length ? editingPhotos.length+' photo(s) enregistrée(s). Tu peux supprimer avec ✕.' : 'Aucune photo enregistrée.';
+}
+function deletePhoto(i){ if(confirm('Supprimer cette photo ?')){ editingPhotos.splice(i,1); renderPhotoList(); } }
+$('photo').onchange=async e=>{
+ for(const f of e.target.files){
+   const data=await new Promise(res=>{let r=new FileReader();r.onload=()=>res(r.result);r.readAsDataURL(f)});
+   editingPhotos.push(data);
+ }
+ $('photo').value=''; renderPhotoList();
+};
 
 function esc(s){return String(s||'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]))}
 let editingId=null, editingPhotos=[];
 
 function clearCanvas(){ctx.clearRect(0,0,pad.width/scale,pad.height/scale)}
-function reset(){['name','company','phone','email','project','follow','note'].forEach(i=>$(i).value='');$('status').value='Nouveau';$('photo').value='';$('photos').innerHTML='';clearCanvas();editingId=null;editingPhotos=[];$('formTitle').textContent='Nouveau contact';$('save').textContent='💾 Enregistrer le contact'}
+function reset(){['name','company','phone','email','project','follow','note'].forEach(i=>$(i).value='');$('status').value='À commander';$('photo').value='';$('photos').innerHTML='';$('photoHelp').textContent='';clearCanvas();editingId=null;editingPhotos=[];setNoteMode('keyboard');$('formTitle').textContent='Nouveau contact';$('save').textContent='💾 Enregistrer le contact'}
 
-function newContact(){reset();view('form')}
+function newContact(){reset();renderPhotoList();view('form')}
 
 function editContact(id){
  let a=JSON.parse(localStorage.getItem('decoContacts')||'[]'),x=a.find(c=>c.id===id);if(!x)return;
@@ -94,25 +147,29 @@ function editContact(id){
  $('name').value=x.name||'';$('company').value=x.company||'';$('phone').value=x.phone||'';$('email').value=x.email||'';
  $('project').value=x.project||'';$('status').value=x.status||'Nouveau';$('follow').value=x.follow||'';$('note').value=x.note||'';
  $('photo').value='';$('photos').innerHTML='';
- if(editingPhotos.length) editingPhotos.forEach(src=>{let im=document.createElement('img');im.src=src;$('photos').appendChild(im)});
+ renderPhotoList();
  clearCanvas();
+ setNoteMode(x.noteType || (x.drawing?'stylus':'keyboard'));
  if(x.drawing){let im=new Image();im.onload=()=>{ctx.drawImage(im,0,0,pad.width/scale,pad.height/scale)};im.src=x.drawing}
  view('form');
 }
 
 $('save').onclick=async()=>{
  let imgs=editingPhotos.slice();
- for(const f of $('photo').files){imgs.push(await new Promise(res=>{let r=new FileReader();r.onload=()=>res(r.result);r.readAsDataURL(f)}))}
  let a=JSON.parse(localStorage.getItem('decoContacts')||'[]');
- let obj={name:$('name').value,company:$('company').value,phone:$('phone').value,email:$('email').value,project:$('project').value,status:$('status').value,follow:$('follow').value,note:$('note').value,drawing:pad.toDataURL(),photos:imgs};
+ let obj={name:$('name').value,company:$('company').value,phone:$('phone').value,email:$('email').value,project:$('project').value,status:$('status').value,follow:$('follow').value,note:$('note').value,drawing:noteMode==='stylus'?pad.toDataURL():'',noteType:noteMode,photos:imgs};
  if(editingId!==null){let i=a.findIndex(c=>c.id===editingId);if(i>=0)a[i]={...a[i],...obj};alert('Contact modifié')}
  else {obj.id=Date.now();a.push(obj);alert('Contact enregistré')}
  localStorage.setItem('decoContacts',JSON.stringify(a));reset();view('list');
 };
 
 function render(){
- let a=JSON.parse(localStorage.getItem('decoContacts')||'[]'),q=$('search').value.toLowerCase(),b=$('listbox');
+ let a=JSON.parse(localStorage.getItem('decoContacts')||'[]'),
+ q=$('search').value.toLowerCase(),
+ sf=$('statusFilter').value,
+ b=$('listbox');
  a=a.filter(x=>(x.name+' '+x.company+' '+x.project+' '+x.phone).toLowerCase().includes(q));
+ if(sf) a=a.filter(x=>x.status===sf);
  b.innerHTML=a.length?'':'<div class="empty">Aucun contact.</div>';
  a.slice().reverse().forEach(x=>{let d=document.createElement('div');d.className='contact';d.innerHTML='<div><b>'+esc(x.name||'Sans nom')+'</b><div class="muted">'+esc(x.company)+' · '+esc(x.project)+'</div><div class="muted">'+esc(x.phone)+'</div></div><span class="badge">'+esc(x.status)+'</span>';d.onclick=()=>showContact(x.id);b.appendChild(d)})
 }
@@ -122,13 +179,14 @@ function showContact(id){
  $('detailTitle').textContent=x.name||'Contact';
  let h='';
  const row=(label,val)=>val?'<div class="detailRow"><div class="detailLabel">'+label+'</div><div class="detailValue">'+esc(val)+'</div></div>':'';
- h+=row('Société',x.company)+row('Téléphone',x.phone)+row('E-mail',x.email)+row('Bateau / Projet',x.project)+row('Statut',x.status)+row('Rappel',x.follow)+row('Notes',x.note);
+ h+=row('Société',x.company)+row('Téléphone',x.phone)+row('E-mail',x.email)+row('Bateau / Projet',x.project)+row('Statut',x.status)+row('Rappel',x.follow)+row('Note au clavier',x.note);
  if(x.photos&&x.photos.length){h+='<div class="detailRow"><div class="detailLabel">Photos du projet</div><div class="detailPhotos">'+x.photos.map(src=>'<img src="'+src+'">').join('')+'</div></div>'}
- if(x.drawing){h+='<div class="detailRow"><div class="detailLabel">Notes au stylet</div><img class="drawing" src="'+x.drawing+'"></div>'}
+ if(x.drawing){h+='<div class="detailRow"><div class="detailLabel">Note manuscrite au stylet</div><img class="drawing" src="'+x.drawing+'"></div>'}
  h+='<div class="editbar"><button class="orange" onclick="editContact('+x.id+')">✏️ Modifier</button><button class="alt" onclick="view(\'list\')">← Contacts</button></div>';
  $('detailBox').innerHTML=h||'<div class="empty">Aucune information.</div>';view('detail')
 }
 $('search').oninput=render;
+$('statusFilter').onchange=render;
 </script>
 </body>
 </html>
