@@ -46,7 +46,7 @@ canvas{width:100%;height:250px;border:2px dashed #c8d8da;border-radius:14px;back
 <div class="row"><div><label>Téléphone</label><input id="phone" type="tel" placeholder="06 00 00 00 00"></div><div><label>E-mail</label><input id="email" type="email" placeholder="contact@entreprise.fr"></div></div>
 <label>Bateau / Projet</label><input id="project" placeholder="Catamaran, covering, décoration…">
 <div class="row"><div><label>Statut</label><select id="status">
-<option>À commander</option><option>À facturer</option><option>À encaisser</option>
+<option>À commander</option><option>Devis</option><option>À rappeler</option><option>À poser</option><option>À facturer</option><option>À encaisser</option><option>Terminé</option>
 </select></div><div><label>Rappel</label><input id="follow" type="date"></div></div>
 <div class="card">
 <h2>📝 Note</h2>
@@ -65,8 +65,6 @@ canvas{width:100%;height:250px;border:2px dashed #c8d8da;border-radius:14px;back
   </div>
 </div>
 </div>
-<canvas id="pad"></canvas>
-<div class="toolbar" style="margin-top:8px"><button class="alt" id="clear">Effacer la note manuscrite</button></div>
 </div>
 <div class="card"><h2>📸 Photos du projet</h2><div class="muted" style="margin-bottom:8px">Tu peux sélectionner plusieurs photos à la fois et en ajouter d’autres lors d’une modification.</div><input id="photo" type="file" accept="image/*" capture="environment" multiple><div id="photos" class="photos"></div><div id="photoHelp" class="muted" style="margin-top:8px"></div></div>
 <button class="orange" style="width:100%;margin-bottom:30px" id="save">💾 Enregistrer le contact</button>
@@ -77,7 +75,7 @@ canvas{width:100%;height:250px;border:2px dashed #c8d8da;border-radius:14px;back
 <div class="card">
 <input class="search" id="search" placeholder="🔎 Rechercher un nom, société, bateau…">
 <select id="statusFilter" style="margin-bottom:10px">
-<option value="">Tous les statuts</option><option>À commander</option><option>À facturer</option><option>À encaisser</option>
+<option value="">Tous les statuts</option><option>À commander</option><option>Devis</option><option>À rappeler</option><option>À poser</option><option>À facturer</option><option>À encaisser</option><option>Terminé</option>
 </select>
 <div id="listbox"></div>
 </div>
@@ -95,7 +93,7 @@ function view(id){document.querySelectorAll('.view').forEach(v=>v.classList.remo
 $('new').onclick=()=>newContact();$('contactsBtn').onclick=()=>view('list');$('back1').onclick=()=>view('list');$('back2').onclick=()=>view('home');$('back3').onclick=()=>view('list');
 
 const pad=$('pad'),ctx=pad.getContext('2d');let scale=devicePixelRatio||1;
-function setupCanvas(){let r=pad.getBoundingClientRect();pad.width=r.width*scale;pad.height=r.height*scale;ctx.setTransform(scale,0,0,scale,0,0);ctx.lineWidth=2.5;ctx.lineCap='round';ctx.strokeStyle='#0C6B74'} setupCanvas();
+function setupCanvas(){let r=pad.getBoundingClientRect();if(!r.width||!r.height)return;pad.width=r.width*scale;pad.height=r.height*scale;ctx.setTransform(scale,0,0,scale,0,0);ctx.lineWidth=2.5;ctx.lineCap='round';ctx.strokeStyle='#0C6B74'} setupCanvas();
 let down=false,x=0,y=0;
 pad.addEventListener('pointerdown',e=>{down=true;pad.setPointerCapture(e.pointerId);let r=pad.getBoundingClientRect();x=e.clientX-r.left;y=e.clientY-r.top});
 pad.addEventListener('pointermove',e=>{if(!down)return;let r=pad.getBoundingClientRect(),nx=e.clientX-r.left,ny=e.clientY-r.top;ctx.beginPath();ctx.moveTo(x,y);ctx.lineTo(nx,ny);ctx.stroke();x=nx;y=ny});
@@ -108,9 +106,10 @@ function setNoteMode(mode){
  $('stylusNoteBox').style.display=mode==='stylus'?'block':'none';
  $('noteKeyboardBtn').className=mode==='keyboard'?'':'alt';
  $('noteStylusBtn').className=mode==='stylus'?'':'alt';
+ if(mode==='stylus') setTimeout(setupCanvas,0);
 }
-$('noteKeyboardBtn').onclick=()=>setNoteMode('keyboard');
-$('noteStylusBtn').onclick=()=>setNoteMode('stylus');
+$('noteKeyboardBtn').onclick=()=>{setNoteMode('keyboard');setTimeout(()=>{$('note').focus()},0)};
+$('noteStylusBtn').onclick=()=>{setNoteMode('stylus');setTimeout(()=>setupCanvas(),0)};
 setNoteMode('keyboard');
 $('clear').onclick=()=>{ctx.clearRect(0,0,pad.width/scale,pad.height/scale)};
 function renderPhotoList(){
@@ -145,7 +144,7 @@ function editContact(id){
  $('formTitle').textContent='Modifier le contact';
  $('save').textContent='💾 Enregistrer les modifications';
  $('name').value=x.name||'';$('company').value=x.company||'';$('phone').value=x.phone||'';$('email').value=x.email||'';
- $('project').value=x.project||'';$('status').value=x.status||'Nouveau';$('follow').value=x.follow||'';$('note').value=x.note||'';
+ $('project').value=x.project||'';$('status').value=x.status||'À commander';$('follow').value=x.follow||'';$('note').value=x.note||'';
  $('photo').value='';$('photos').innerHTML='';
  renderPhotoList();
  clearCanvas();
