@@ -16,7 +16,7 @@ input,select,textarea{width:100%;padding:13px;border:1px solid #d4e0e2;border-ra
 .toolbar{display:flex;gap:8px;flex-wrap:wrap}.toolbar button{min-height:42px;padding:9px 12px;font-size:14px}
 canvas{width:100%;height:250px;border:2px dashed #c8d8da;border-radius:14px;background:#fff;touch-action:none}
 .photos{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}.photos img{width:100%;aspect-ratio:1;object-fit:cover;border-radius:12px}
-.contact{padding:13px 0;border-bottom:1px solid #e6eeee;display:flex;justify-content:space-between;gap:10px}.contact:last-child{border-bottom:0}.badge{background:#edf6f7;color:var(--d);padding:6px 9px;border-radius:10px;font-size:12px;white-space:nowrap}.muted{color:var(--muted);font-size:13px}
+.contact{padding:13px 0;border-bottom:1px solid #e6eeee;display:flex;justify-content:space-between;gap:10px;cursor:pointer}.contact:last-child{border-bottom:0}.contact:active{background:#f1f8f9;border-radius:12px}.badge{background:#edf6f7;color:var(--d);padding:6px 9px;border-radius:10px;font-size:12px;white-space:nowrap}.muted{color:var(--muted);font-size:13px}.detailRow{padding:9px 0;border-bottom:1px solid #e8eeee}.detailLabel{font-size:11px;font-weight:800;color:#668087;text-transform:uppercase;letter-spacing:.5px}.detailValue{font-size:16px;margin-top:2px;white-space:pre-wrap}.detailPhotos{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:10px}.detailPhotos img{width:100%;aspect-ratio:1;object-fit:cover;border-radius:12px}.drawing{width:100%;border:1px solid #d4e0e2;border-radius:12px;margin-top:8px;background:#fff}
 .search{margin-bottom:10px}.empty{text-align:center;color:var(--muted);padding:25px 10px}.top{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
 @media(max-width:650px){.row{grid-template-columns:1fr}.actions{grid-template-columns:1fr 1fr}main{padding:10px}}
 </style></head>
@@ -46,11 +46,16 @@ canvas{width:100%;height:250px;border:2px dashed #c8d8da;border-radius:14px;back
 <div class="top"><h2>Mes contacts</h2><button class="alt" id="back2">← Retour</button></div>
 <div class="card"><input class="search" id="search" placeholder="🔎 Rechercher un nom, société, bateau…"><div id="listbox"></div></div>
 </section>
+
+<section id="detail" class="view">
+<div class="top"><h2 id="detailTitle">Contact</h2><button class="alt" id="back3">← Contacts</button></div>
+<div class="card" id="detailBox"></div>
+</section>
 </main>
 <script>
 const $=id=>document.getElementById(id);
 function view(id){document.querySelectorAll('.view').forEach(v=>v.classList.remove('on'));$(id).classList.add('on');scrollTo(0,0);if(id==='list')render();}
-$('new').onclick=()=>view('form');$('contactsBtn').onclick=()=>view('list');$('back1').onclick=()=>view('home');$('back2').onclick=()=>view('home');
+$('new').onclick=()=>view('form');$('contactsBtn').onclick=()=>view('list');$('back1').onclick=()=>view('home');$('back2').onclick=()=>view('home');$('back3').onclick=()=>view('list');
 
 const pad=$('pad'),ctx=pad.getContext('2d');let scale=devicePixelRatio||1;
 function setupCanvas(){let r=pad.getBoundingClientRect();pad.width=r.width*scale;pad.height=r.height*scale;ctx.setTransform(scale,0,0,scale,0,0);ctx.lineWidth=2.5;ctx.lineCap='round';ctx.strokeStyle='#0C6B74'} setupCanvas();
@@ -69,6 +74,14 @@ $('save').onclick=async()=>{
  a.push({id:Date.now(),name:$('name').value,company:$('company').value,phone:$('phone').value,email:$('email').value,project:$('project').value,status:$('status').value,follow:$('follow').value,note:$('note').value,drawing:pad.toDataURL(),photos:imgs});
  localStorage.setItem('decoContacts',JSON.stringify(a));alert('Contact enregistré');reset();view('list')
 };
-function render(){let a=JSON.parse(localStorage.getItem('decoContacts')||'[]'),q=$('search').value.toLowerCase(),b=$('listbox');a=a.filter(x=>(x.name+' '+x.company+' '+x.project+' '+x.phone).toLowerCase().includes(q));b.innerHTML=a.length?'':'<div class="empty">Aucun contact.</div>';a.slice().reverse().forEach(x=>{let d=document.createElement('div');d.className='contact';d.innerHTML='<div><b>'+esc(x.name||'Sans nom')+'</b><div class="muted">'+esc(x.company)+' · '+esc(x.project)+'</div><div class="muted">'+esc(x.phone)+'</div></div><span class="badge">'+esc(x.status)+'</span>';b.appendChild(d)})}
+function render(){let a=JSON.parse(localStorage.getItem('decoContacts')||'[]'),q=$('search').value.toLowerCase(),b=$('listbox');a=a.filter(x=>(x.name+' '+x.company+' '+x.project+' '+x.phone).toLowerCase().includes(q));b.innerHTML=a.length?'':'<div class="empty">Aucun contact.</div>';a.slice().reverse().forEach(x=>{let d=document.createElement('div');d.className='contact';d.innerHTML='<div><b>'+esc(x.name||'Sans nom')+'</b><div class="muted">'+esc(x.company)+' · '+esc(x.project)+'</div><div class="muted">'+esc(x.phone)+'</div></div><span class="badge">'+esc(x.status)+'</span>';d.onclick=()=>showContact(x.id);b.appendChild(d)})}
+function showContact(id){let a=JSON.parse(localStorage.getItem('decoContacts')||'[]'),x=a.find(c=>c.id===id);if(!x)return;
+$('detailTitle').textContent=x.name||'Contact';
+let h='';
+const row=(label,val)=>val?'<div class="detailRow"><div class="detailLabel">'+label+'</div><div class="detailValue">'+esc(val)+'</div></div>':'';
+h+=row('Société',x.company)+row('Téléphone',x.phone)+row('E-mail',x.email)+row('Bateau / Projet',x.project)+row('Statut',x.status)+row('Rappel',x.follow)+row('Notes',x.note);
+if(x.photos&&x.photos.length){h+='<div class="detailRow"><div class="detailLabel">Photos du projet</div><div class="detailPhotos">'+x.photos.map(src=>'<img src="'+src+'">').join('')+'</div></div>'}
+if(x.drawing){h+='<div class="detailRow"><div class="detailLabel">Notes au stylet</div><img class="drawing" src="'+x.drawing+'"></div>'}
+$('detailBox').innerHTML=h||'<div class="empty">Aucune information.</div>';view('detail')}
 $('search').oninput=render;
 </script></body></html>
