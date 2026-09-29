@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="fr"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#0C6B74"><title>DECOSHIP Contacts</title>
+<style>
+:root{--d:#0C6B74;--b:#1C93A9;--o:#F08628;--y:#FCC019;--bg:#f3f7f7;--ink:#17343a;--muted:#6e858a}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display",Arial,sans-serif;color:var(--ink)}
+header{background:linear-gradient(135deg,var(--d),var(--b));color:white;padding:18px max(18px,calc((100% - 1000px)/2)) 16px;position:sticky;top:0;z-index:10}
+.logo{font-weight:900;letter-spacing:3px;font-size:26px}.tag{font-size:11px;letter-spacing:1.3px;opacity:.9;margin-top:2px}
+main{max-width:1000px;margin:auto;padding:14px}.view{display:none}.view.on{display:block}.card{background:#fff;border-radius:18px;padding:16px;margin-bottom:14px;box-shadow:0 3px 18px #12343a12}
+h2{margin:0 0 14px;font-size:19px}.actions{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+button{border:0;border-radius:14px;padding:14px 15px;font-size:16px;font-weight:750;background:var(--d);color:#fff;min-height:50px}button.alt{background:#e7f1f2;color:var(--d)}button.orange{background:var(--o)}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:10px}label{display:block;font-size:12px;font-weight:700;color:#557177;margin:3px 0}
+input,select,textarea{width:100%;padding:13px;border:1px solid #d4e0e2;border-radius:12px;font-size:16px;background:white;margin:4px 0 10px}textarea{resize:vertical}
+.toolbar{display:flex;gap:8px;flex-wrap:wrap}.toolbar button{min-height:42px;padding:9px 12px;font-size:14px}
+canvas{width:100%;height:250px;border:2px dashed #c8d8da;border-radius:14px;background:#fff;touch-action:none}
+.photos{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}.photos img{width:100%;aspect-ratio:1;object-fit:cover;border-radius:12px}
+.contact{padding:13px 0;border-bottom:1px solid #e6eeee;display:flex;justify-content:space-between;gap:10px}.contact:last-child{border-bottom:0}.badge{background:#edf6f7;color:var(--d);padding:6px 9px;border-radius:10px;font-size:12px;white-space:nowrap}.muted{color:var(--muted);font-size:13px}
+.search{margin-bottom:10px}.empty{text-align:center;color:var(--muted);padding:25px 10px}.top{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
+@media(max-width:650px){.row{grid-template-columns:1fr}.actions{grid-template-columns:1fr 1fr}main{padding:10px}}
+</style></head>
+<body>
+<header><div class="logo">DECOSHIP</div><div class="tag">CONTACTS • SALONS • VISITES CLIENTS</div></header>
+<main>
+<section id="home" class="view on">
+<div class="card"><div class="actions"><button id="new">＋ Nouveau contact</button><button class="alt" id="contactsBtn">📋 Mes contacts</button></div></div>
+<div class="card"><h2>Prise de contact rapide</h2><div class="muted">Une fiche client, les photos du bateau et tes notes au stylet, réunis au même endroit.</div></div>
+</section>
+
+<section id="form" class="view">
+<div class="top"><h2>Nouveau contact</h2><button class="alt" id="back1">← Retour</button></div>
+<div class="card">
+<div class="row"><div><label>Nom / Prénom</label><input id="name" autocomplete="name" placeholder="Jean Dupont"></div><div><label>Société</label><input id="company" placeholder="Entreprise"></div></div>
+<div class="row"><div><label>Téléphone</label><input id="phone" type="tel" placeholder="06 00 00 00 00"></div><div><label>E-mail</label><input id="email" type="email" placeholder="contact@entreprise.fr"></div></div>
+<label>Bateau / Projet</label><input id="project" placeholder="Catamaran, covering, décoration…">
+<div class="row"><div><label>Statut</label><select id="status"><option>Nouveau</option><option>À rappeler</option><option>Devis</option><option>En attente</option><option>Terminé</option></select></div><div><label>Rappel</label><input id="follow" type="date"></div></div>
+<label>Notes</label><textarea id="note" rows="3" placeholder="Demande du client, dimensions, idées…"></textarea>
+</div>
+<div class="card"><h2>✍️ Notes au stylet</h2><canvas id="pad"></canvas><div class="toolbar" style="margin-top:8px"><button class="alt" id="clear">Effacer</button></div></div>
+<div class="card"><h2>📸 Photos du projet</h2><input id="photo" type="file" accept="image/*" capture="environment" multiple><div id="photos" class="photos"></div></div>
+<button class="orange" style="width:100%;margin-bottom:30px" id="save">💾 Enregistrer le contact</button>
+</section>
+
+<section id="list" class="view">
+<div class="top"><h2>Mes contacts</h2><button class="alt" id="back2">← Retour</button></div>
+<div class="card"><input class="search" id="search" placeholder="🔎 Rechercher un nom, société, bateau…"><div id="listbox"></div></div>
+</section>
+</main>
+<script>
+const $=id=>document.getElementById(id);
+function view(id){document.querySelectorAll('.view').forEach(v=>v.classList.remove('on'));$(id).classList.add('on');scrollTo(0,0);if(id==='list')render();}
+$('new').onclick=()=>view('form');$('contactsBtn').onclick=()=>view('list');$('back1').onclick=()=>view('home');$('back2').onclick=()=>view('home');
+
+const pad=$('pad'),ctx=pad.getContext('2d');let scale=devicePixelRatio||1;
+function setupCanvas(){let r=pad.getBoundingClientRect();pad.width=r.width*scale;pad.height=r.height*scale;ctx.setTransform(scale,0,0,scale,0,0);ctx.lineWidth=2.5;ctx.lineCap='round';ctx.strokeStyle='#0C6B74'} setupCanvas();
+let down=false,x=0,y=0;
+pad.addEventListener('pointerdown',e=>{down=true;pad.setPointerCapture(e.pointerId);let r=pad.getBoundingClientRect();x=e.clientX-r.left;y=e.clientY-r.top});
+pad.addEventListener('pointermove',e=>{if(!down)return;let r=pad.getBoundingClientRect(),nx=e.clientX-r.left,ny=e.clientY-r.top;ctx.beginPath();ctx.moveTo(x,y);ctx.lineTo(nx,ny);ctx.stroke();x=nx;y=ny});
+['pointerup','pointercancel'].forEach(t=>pad.addEventListener(t,()=>down=false));
+$('clear').onclick=()=>{ctx.clearRect(0,0,pad.width/scale,pad.height/scale)};
+
+$('photo').onchange=e=>{ $('photos').innerHTML='';[...e.target.files].forEach(f=>{let im=document.createElement('img');im.src=URL.createObjectURL(f);$('photos').appendChild(im)})};
+function esc(s){return String(s||'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]))}
+function reset(){['name','company','phone','email','project','follow','note'].forEach(i=>$(i).value='');$('status').value='Nouveau';$('photo').value='';$('photos').innerHTML='';ctx.clearRect(0,0,pad.width/scale,pad.height/scale)}
+$('save').onclick=async()=>{
+ let imgs=[];for(const f of $('photo').files){imgs.push(await new Promise(res=>{let r=new FileReader();r.onload=()=>res(r.result);r.readAsDataURL(f)}))}
+ let a=JSON.parse(localStorage.getItem('decoContacts')||'[]');
+ a.push({id:Date.now(),name:$('name').value,company:$('company').value,phone:$('phone').value,email:$('email').value,project:$('project').value,status:$('status').value,follow:$('follow').value,note:$('note').value,drawing:pad.toDataURL(),photos:imgs});
+ localStorage.setItem('decoContacts',JSON.stringify(a));alert('Contact enregistré');reset();view('list')
+};
+function render(){let a=JSON.parse(localStorage.getItem('decoContacts')||'[]'),q=$('search').value.toLowerCase(),b=$('listbox');a=a.filter(x=>(x.name+' '+x.company+' '+x.project+' '+x.phone).toLowerCase().includes(q));b.innerHTML=a.length?'':'<div class="empty">Aucun contact.</div>';a.slice().reverse().forEach(x=>{let d=document.createElement('div');d.className='contact';d.innerHTML='<div><b>'+esc(x.name||'Sans nom')+'</b><div class="muted">'+esc(x.company)+' · '+esc(x.project)+'</div><div class="muted">'+esc(x.phone)+'</div></div><span class="badge">'+esc(x.status)+'</span>';b.appendChild(d)})}
+$('search').oninput=render;
+</script></body></html>
