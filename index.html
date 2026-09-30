@@ -66,7 +66,7 @@ canvas{width:100%;height:250px;border:2px dashed #c8d8da;border-radius:14px;back
 </div>
 </div>
 </div>
-<div class="card"><h2>📸 Photos du projet</h2><div class="muted" style="margin-bottom:8px">Tu peux sélectionner plusieurs photos à la fois et en ajouter d’autres lors d’une modification.</div><input id="photo" type="file" accept="image/*" capture="environment" multiple><div id="photos" class="photos"></div><div id="photoHelp" class="muted" style="margin-top:8px"></div></div>
+<div class="card"><h2>📸 Photos du projet</h2><div class="muted" style="margin-bottom:10px">Ajoute une photo en la prenant avec l’appareil photo ou choisis-la dans ta photothèque.</div><input id="photoCamera" type="file" accept="image/*" capture="environment" style="display:none"><input id="photoLibrary" type="file" accept="image/*" multiple style="display:none"><div style="display:flex;gap:8px;flex-wrap:wrap"><button type="button" onclick="$('photoCamera').click()">📷 Prendre une photo</button><button type="button" class="secondary" onclick="$('photoLibrary').click()">🖼️ Photothèque</button></div><div id="photos" class="photos" style="margin-top:10px"></div><div id="photoHelp" class="muted" style="margin-top:8px"></div></div>
 <button class="orange" style="width:100%;margin-bottom:30px" id="save">💾 Enregistrer le contact</button>
 </section>
 
@@ -122,19 +122,21 @@ function renderPhotoList(){
  $('photoHelp').textContent=editingPhotos.length ? editingPhotos.length+' photo(s) enregistrée(s). Tu peux supprimer avec ✕.' : 'Aucune photo enregistrée.';
 }
 function deletePhoto(i){ if(confirm('Supprimer cette photo ?')){ editingPhotos.splice(i,1); renderPhotoList(); } }
-$('photo').onchange=async e=>{
- for(const f of e.target.files){
+async function addPhotoFiles(files){
+ for(const f of [...files]){
    const data=await new Promise(res=>{let r=new FileReader();r.onload=()=>res(r.result);r.readAsDataURL(f)});
    editingPhotos.push(data);
  }
- $('photo').value=''; renderPhotoList();
-};
+ $('photoCamera').value=''; $('photoLibrary').value=''; renderPhotoList();
+}
+$('photoCamera').onchange=e=>addPhotoFiles(e.target.files);
+$('photoLibrary').onchange=e=>addPhotoFiles(e.target.files);
 
 function esc(s){return String(s||'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]))}
 let editingId=null, editingPhotos=[];
 
 function clearCanvas(){ctx.clearRect(0,0,pad.width/scale,pad.height/scale)}
-function reset(){['name','company','phone','email','project','follow','note'].forEach(i=>$(i).value='');$('status').value='À commander';$('photo').value='';$('photos').innerHTML='';$('photoHelp').textContent='';clearCanvas();editingId=null;editingPhotos=[];setNoteMode('keyboard');$('formTitle').textContent='Nouveau contact';$('save').textContent='💾 Enregistrer le contact'}
+function reset(){['name','company','phone','email','project','follow','note'].forEach(i=>$(i).value='');$('status').value='À commander';$('photoCamera').value='';$('photoLibrary').value='';$('photos').innerHTML='';$('photoHelp').textContent='';clearCanvas();editingId=null;editingPhotos=[];setNoteMode('keyboard');$('formTitle').textContent='Nouveau contact';$('save').textContent='💾 Enregistrer le contact'}
 
 function newContact(){reset();renderPhotoList();view('form')}
 
@@ -145,7 +147,7 @@ function editContact(id){
  $('save').textContent='💾 Enregistrer les modifications';
  $('name').value=x.name||'';$('company').value=x.company||'';$('phone').value=x.phone||'';$('email').value=x.email||'';
  $('project').value=x.project||'';$('status').value=x.status||'À commander';$('follow').value=x.follow||'';$('note').value=x.note||'';
- $('photo').value='';$('photos').innerHTML='';
+ $('photoCamera').value='';$('photoLibrary').value='';$('photos').innerHTML='';
  renderPhotoList();
  clearCanvas();
  setNoteMode(x.noteType || (x.drawing?'stylus':'keyboard'));
