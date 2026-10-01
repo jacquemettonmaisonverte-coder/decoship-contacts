@@ -122,10 +122,28 @@ function renderPhotoList(){
  $('photoHelp').textContent=editingPhotos.length ? editingPhotos.length+' photo(s) enregistrée(s). Tu peux supprimer avec ✕.' : 'Aucune photo enregistrée.';
 }
 function deletePhoto(i){ if(confirm('Supprimer cette photo ?')){ editingPhotos.splice(i,1); renderPhotoList(); } }
+async function compressPhoto(file){
+ return await new Promise((resolve,reject)=>{
+   const r=new FileReader();
+   r.onload=()=>{
+     const im=new Image();
+     im.onload=()=>{
+       const max=1400;
+       const ratio=Math.min(1,max/Math.max(im.naturalWidth,im.naturalHeight));
+       const w=Math.max(1,Math.round(im.naturalWidth*ratio)), h=Math.max(1,Math.round(im.naturalHeight*ratio));
+       const c=document.createElement('canvas'); c.width=w; c.height=h;
+       const cctx=c.getContext('2d'); cctx.drawImage(im,0,0,w,h);
+       resolve(c.toDataURL('image/jpeg',0.72));
+     };
+     im.onerror=reject; im.src=r.result;
+   };
+   r.onerror=reject; r.readAsDataURL(file);
+ });
+}
 async function addPhotoFiles(files){
  for(const f of [...files]){
-   const data=await new Promise(res=>{let r=new FileReader();r.onload=()=>res(r.result);r.readAsDataURL(f)});
-   editingPhotos.push(data);
+   try{ editingPhotos.push(await compressPhoto(f)); }
+   catch(e){ alert('Impossible de charger une photo.'); }
  }
  $('photoCamera').value=''; $('photoLibrary').value=''; renderPhotoList();
 }
@@ -161,7 +179,13 @@ $('save').onclick=async()=>{
  let obj={name:$('name').value,company:$('company').value,phone:$('phone').value,email:$('email').value,project:$('project').value,status:$('status').value,follow:$('follow').value,note:$('note').value,drawing:noteMode==='stylus'?pad.toDataURL():'',noteType:noteMode,photos:imgs};
  if(editingId!==null){let i=a.findIndex(c=>c.id===editingId);if(i>=0)a[i]={...a[i],...obj};alert('Contact modifié')}
  else {obj.id=Date.now();a.push(obj);alert('Contact enregistré')}
- localStorage.setItem('decoContacts',JSON.stringify(a));reset();view('list');
+ try{
+   localStorage.setItem('decoContacts',JSON.stringify(a));
+ }catch(e){
+   alert('Le contact n’a pas pu être enregistré. Le stockage photo est plein. Les photos sont automatiquement réduites dans cette version ; supprime quelques anciennes photos puis réessaie.');
+   return;
+ }
+ reset();view('list');
 };
 
 function render(){
