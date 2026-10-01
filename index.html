@@ -89,129 +89,398 @@ canvas{width:100%;height:250px;border:2px dashed #c8d8da;border-radius:14px;back
 </main>
 <script>
 const $=id=>document.getElementById(id);
-function view(id){document.querySelectorAll('.view').forEach(v=>v.classList.remove('on'));$(id).classList.add('on');scrollTo(0,0);if(id==='list')render();}
-$('new').onclick=()=>newContact();$('contactsBtn').onclick=()=>view('list');$('back1').onclick=()=>view('list');$('back2').onclick=()=>view('home');$('back3').onclick=()=>view('list');
 
-const pad=$('pad'),ctx=pad.getContext('2d');let scale=devicePixelRatio||1;
-function setupCanvas(){let r=pad.getBoundingClientRect();if(!r.width||!r.height)return;pad.width=r.width*scale;pad.height=r.height*scale;ctx.setTransform(scale,0,0,scale,0,0);ctx.lineWidth=2.5;ctx.lineCap='round';ctx.strokeStyle='#0C6B74'} setupCanvas();
+/* =========================
+   STOCKAGE DES CONTACTS
+   =========================
+   V8 : les contacts et leurs photos sont stockés dans IndexedDB
+   au lieu de localStorage. Cela évite la limite d'environ 5 Mo
+   de localStorage qui bloquait l'enregistrement des nouveaux clients.
+*/
+const DB_NAME='DecoshipContactsDB';
+const DB_VERSION=1;
+const STORE='contacts';
+let dbPromise=null;
+
+function openDB(){
+  if(dbPromise) return dbPromise;
+  dbPromise=new Promise((resolve,reject)=>{
+    const req=indexedDB.open(DB_NAME,DB_VERSION);
+    req.onupgradeneeded=()=>{
+      const db=req.result;
+      if(!db.objectStoreNames.contains(STORE)){
+        db.createObjectStore(STORE,{keyPath:'id'});
+      }
+    };
+    req.onsuccess=()=>resolve(req.result);
+    req.onerror=()=>reject(req.error);
+  });
+  return dbPromise;
+}
+
+async function dbGetAll(){
+  const db=await openDB();
+  return new Promise((resolve,reject)=>{
+    const tx=db.transaction(STORE,'readonly');
+    const req=tx.objectStore(STORE).getAll();
+    req.onsuccess=()=>resolve(req.result||[]);
+    req.onerror=()=>reject(req.error);
+  });
+}
+
+async function dbPut(contact){
+  const db=await openDB();
+  return new Promise((resolve,reject)=>{
+    const tx=db.transaction(STORE,'readwrite');
+    tx.objectStore(STORE).put(contact);
+    tx.oncomplete=()=>resolve();
+    tx.onerror=()=>reject(tx.error);
+    tx.onabort=()=>reject(tx.error||new Error('Transaction annulée'));
+  });
+}
+
+async function dbDelete(id){
+  const db=await openDB();
+  return new Promise((resolve,reject)=>{
+    const tx=db.transaction(STORE,'readwrite');
+    tx.objectStore(STORE).delete(id);
+    tx.oncomplete=()=>resolve();
+    tx.onerror=()=>reject(tx.error);
+    tx.onabort=()=>reject(tx.error||new Error('Transaction annulée'));
+  });
+}
+
+/* Migration automatique des anciens contacts V8 stockés dans localStorage.
+   Les anciennes données restent intactes tant que la copie n'est pas réussie. */
+async function migrateOldContacts(){
+  const raw=localStorage.getItem('decoContacts');
+  if(!raw) return;
+  let old;
+  try{ old=JSON.parse(raw)||[]; }catch(e){ return; }
+  if(!Array.isArray(old)||!old.length) return;
+
+  const current=await dbGetAll();
+  const existingIds=new Set(current.map(x=>x.id));
+  for(const c of old){
+    if(c && c.id!=null && !existingIds.has(c.id)){
+      await dbPut(c);
+    }
+  }
+
+  /* On ne garde plus la copie lourde dans localStorage après migration réussie. */
+  try{ localStorage.removeItem('decoContacts'); }catch(e){}
+}
+
+async function getContacts(){
+  await migrateOldContacts();
+  return await dbGetAll();
+}
+
+async function getContact(id){
+  const a=await getContacts();
+  return a.find(c=>c.id===id)||null;
+}
+
+function view(id){
+  document.querySelectorAll('.view').forEach(v=>v.classList.remove('on'));
+  $(id).classList.add('on');
+  scrollTo(0,0);
+  if(id==='list') render();
+}
+
+$('new').onclick=()=>newContact();
+$('contactsBtn').onclick=()=>view('list');
+$('back1').onclick=()=>view('list');
+$('back2').onclick=()=>view('home');
+$('back3').onclick=()=>view('list');
+
+const pad=$('pad'),ctx=pad.getContext('2d');
+let scale=devicePixelRatio||1;
+function setupCanvas(){
+  let r=pad.getBoundingClientRect();
+  if(!r.width||!r.height)return;
+  pad.width=r.width*scale;
+  pad.height=r.height*scale;
+  ctx.setTransform(scale,0,0,scale,0,0);
+  ctx.lineWidth=2.5;
+  ctx.lineCap='round';
+  ctx.strokeStyle='#0C6B74';
+}
+setupCanvas();
+
 let down=false,x=0,y=0;
-pad.addEventListener('pointerdown',e=>{down=true;pad.setPointerCapture(e.pointerId);let r=pad.getBoundingClientRect();x=e.clientX-r.left;y=e.clientY-r.top});
-pad.addEventListener('pointermove',e=>{if(!down)return;let r=pad.getBoundingClientRect(),nx=e.clientX-r.left,ny=e.clientY-r.top;ctx.beginPath();ctx.moveTo(x,y);ctx.lineTo(nx,ny);ctx.stroke();x=nx;y=ny});
+pad.addEventListener('pointerdown',e=>{
+  down=true;
+  pad.setPointerCapture(e.pointerId);
+  let r=pad.getBoundingClientRect();
+  x=e.clientX-r.left;
+  y=e.clientY-r.top;
+});
+pad.addEventListener('pointermove',e=>{
+  if(!down)return;
+  let r=pad.getBoundingClientRect(),nx=e.clientX-r.left,ny=e.clientY-r.top;
+  ctx.beginPath();
+  ctx.moveTo(x,y);
+  ctx.lineTo(nx,ny);
+  ctx.stroke();
+  x=nx;y=ny;
+});
 ['pointerup','pointercancel'].forEach(t=>pad.addEventListener(t,()=>down=false));
 
 let noteMode='keyboard';
 function setNoteMode(mode){
- noteMode=mode;
- $('keyboardNoteBox').style.display=mode==='keyboard'?'block':'none';
- $('stylusNoteBox').style.display=mode==='stylus'?'block':'none';
- $('noteKeyboardBtn').className=mode==='keyboard'?'':'alt';
- $('noteStylusBtn').className=mode==='stylus'?'':'alt';
- if(mode==='stylus') setTimeout(setupCanvas,0);
+  noteMode=mode;
+  $('keyboardNoteBox').style.display=mode==='keyboard'?'block':'none';
+  $('stylusNoteBox').style.display=mode==='stylus'?'block':'none';
+  $('noteKeyboardBtn').className=mode==='keyboard'?'':'alt';
+  $('noteStylusBtn').className=mode==='stylus'?'':'alt';
+  if(mode==='stylus') setTimeout(setupCanvas,0);
 }
-$('noteKeyboardBtn').onclick=()=>{setNoteMode('keyboard');setTimeout(()=>{$('note').focus()},0)};
-$('noteStylusBtn').onclick=()=>{setNoteMode('stylus');setTimeout(()=>setupCanvas(),0)};
+$('noteKeyboardBtn').onclick=()=>{
+  setNoteMode('keyboard');
+  setTimeout(()=>{$('note').focus()},0);
+};
+$('noteStylusBtn').onclick=()=>{
+  setNoteMode('stylus');
+  setTimeout(()=>setupCanvas(),0);
+};
 setNoteMode('keyboard');
 $('clear').onclick=()=>{ctx.clearRect(0,0,pad.width/scale,pad.height/scale)};
+
 function renderPhotoList(){
- const box=$('photos'); box.innerHTML='';
- editingPhotos.forEach((src,i)=>{
-   const wrap=document.createElement('div'); wrap.style.position='relative';
-   wrap.innerHTML='<img src="'+src+'" style="width:100%;aspect-ratio:1;object-fit:cover;border-radius:12px"><button type="button" class="orange" style="position:absolute;right:5px;top:5px;min-height:34px;padding:5px 9px;border-radius:10px" onclick="deletePhoto('+i+')">✕</button>';
-   box.appendChild(wrap);
- });
- $('photoHelp').textContent=editingPhotos.length ? editingPhotos.length+' photo(s) enregistrée(s). Tu peux supprimer avec ✕.' : 'Aucune photo enregistrée.';
+  const box=$('photos');
+  box.innerHTML='';
+  editingPhotos.forEach((src,i)=>{
+    const wrap=document.createElement('div');
+    wrap.style.position='relative';
+    wrap.innerHTML='<img src="'+src+'" style="width:100%;aspect-ratio:1;object-fit:cover;border-radius:12px"><button type="button" class="orange" style="position:absolute;right:5px;top:5px;min-height:34px;padding:5px 9px;border-radius:10px" onclick="deletePhoto('+i+')">✕</button>';
+    box.appendChild(wrap);
+  });
+  $('photoHelp').textContent=editingPhotos.length
+    ? editingPhotos.length+' photo(s) enregistrée(s). Tu peux supprimer avec ✕.'
+    : 'Aucune photo enregistrée.';
 }
-function deletePhoto(i){ if(confirm('Supprimer cette photo ?')){ editingPhotos.splice(i,1); renderPhotoList(); } }
+
+function deletePhoto(i){
+  if(confirm('Supprimer cette photo ?')){
+    editingPhotos.splice(i,1);
+    renderPhotoList();
+  }
+}
+
 async function compressPhoto(file){
- return await new Promise((resolve,reject)=>{
-   const r=new FileReader();
-   r.onload=()=>{
-     const im=new Image();
-     im.onload=()=>{
-       const max=1400;
-       const ratio=Math.min(1,max/Math.max(im.naturalWidth,im.naturalHeight));
-       const w=Math.max(1,Math.round(im.naturalWidth*ratio)), h=Math.max(1,Math.round(im.naturalHeight*ratio));
-       const c=document.createElement('canvas'); c.width=w; c.height=h;
-       const cctx=c.getContext('2d'); cctx.drawImage(im,0,0,w,h);
-       resolve(c.toDataURL('image/jpeg',0.72));
-     };
-     im.onerror=reject; im.src=r.result;
-   };
-   r.onerror=reject; r.readAsDataURL(file);
- });
+  return await new Promise((resolve,reject)=>{
+    const r=new FileReader();
+    r.onload=()=>{
+      const im=new Image();
+      im.onload=()=>{
+        /* Photos encore plus légères : 1200 px maximum et qualité 0,65. */
+        const max=1200;
+        const ratio=Math.min(1,max/Math.max(im.naturalWidth,im.naturalHeight));
+        const w=Math.max(1,Math.round(im.naturalWidth*ratio));
+        const h=Math.max(1,Math.round(im.naturalHeight*ratio));
+        const c=document.createElement('canvas');
+        c.width=w;c.height=h;
+        const cctx=c.getContext('2d');
+        cctx.drawImage(im,0,0,w,h);
+        resolve(c.toDataURL('image/jpeg',0.65));
+      };
+      im.onerror=reject;
+      im.src=r.result;
+    };
+    r.onerror=reject;
+    r.readAsDataURL(file);
+  });
 }
+
 async function addPhotoFiles(files){
- for(const f of [...files]){
-   try{ editingPhotos.push(await compressPhoto(f)); }
-   catch(e){ alert('Impossible de charger une photo.'); }
- }
- $('photoCamera').value=''; $('photoLibrary').value=''; renderPhotoList();
+  for(const f of [...files]){
+    try{
+      editingPhotos.push(await compressPhoto(f));
+    }catch(e){
+      alert('Impossible de charger une photo.');
+    }
+  }
+  $('photoCamera').value='';
+  $('photoLibrary').value='';
+  renderPhotoList();
 }
 $('photoCamera').onchange=e=>addPhotoFiles(e.target.files);
 $('photoLibrary').onchange=e=>addPhotoFiles(e.target.files);
 
-function esc(s){return String(s||'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]))}
-let editingId=null, editingPhotos=[];
+function esc(s){
+  return String(s||'').replace(/[&<>"']/g,m=>({
+    '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'
+  }[m]));
+}
 
-function clearCanvas(){ctx.clearRect(0,0,pad.width/scale,pad.height/scale)}
-function reset(){['name','company','phone','email','project','follow','note'].forEach(i=>$(i).value='');$('status').value='À commander';$('photoCamera').value='';$('photoLibrary').value='';$('photos').innerHTML='';$('photoHelp').textContent='';clearCanvas();editingId=null;editingPhotos=[];setNoteMode('keyboard');$('formTitle').textContent='Nouveau contact';$('save').textContent='💾 Enregistrer le contact'}
+let editingId=null,editingPhotos=[];
 
-function newContact(){reset();renderPhotoList();view('form')}
+function clearCanvas(){
+  ctx.clearRect(0,0,pad.width/scale,pad.height/scale);
+}
 
-function editContact(id){
- let a=JSON.parse(localStorage.getItem('decoContacts')||'[]'),x=a.find(c=>c.id===id);if(!x)return;
- editingId=id;editingPhotos=x.photos||[];
- $('formTitle').textContent='Modifier le contact';
- $('save').textContent='💾 Enregistrer les modifications';
- $('name').value=x.name||'';$('company').value=x.company||'';$('phone').value=x.phone||'';$('email').value=x.email||'';
- $('project').value=x.project||'';$('status').value=x.status||'À commander';$('follow').value=x.follow||'';$('note').value=x.note||'';
- $('photoCamera').value='';$('photoLibrary').value='';$('photos').innerHTML='';
- renderPhotoList();
- clearCanvas();
- setNoteMode(x.noteType || (x.drawing?'stylus':'keyboard'));
- if(x.drawing){let im=new Image();im.onload=()=>{ctx.drawImage(im,0,0,pad.width/scale,pad.height/scale)};im.src=x.drawing}
- view('form');
+function reset(){
+  ['name','company','phone','email','project','follow','note'].forEach(i=>$(i).value='');
+  $('status').value='À commander';
+  $('photoCamera').value='';
+  $('photoLibrary').value='';
+  $('photos').innerHTML='';
+  $('photoHelp').textContent='';
+  clearCanvas();
+  editingId=null;
+  editingPhotos=[];
+  setNoteMode('keyboard');
+  $('formTitle').textContent='Nouveau contact';
+  $('save').textContent='💾 Enregistrer le contact';
+}
+
+function newContact(){
+  reset();
+  renderPhotoList();
+  view('form');
+}
+
+async function editContact(id){
+  let x=await getContact(id);
+  if(!x)return;
+
+  editingId=id;
+  editingPhotos=Array.isArray(x.photos)?x.photos.slice():[];
+
+  $('formTitle').textContent='Modifier le contact';
+  $('save').textContent='💾 Enregistrer les modifications';
+  $('name').value=x.name||'';
+  $('company').value=x.company||'';
+  $('phone').value=x.phone||'';
+  $('email').value=x.email||'';
+  $('project').value=x.project||'';
+  $('status').value=x.status||'À commander';
+  $('follow').value=x.follow||'';
+  $('note').value=x.note||'';
+  $('photoCamera').value='';
+  $('photoLibrary').value='';
+  $('photos').innerHTML='';
+  renderPhotoList();
+  clearCanvas();
+  setNoteMode(x.noteType || (x.drawing?'stylus':'keyboard'));
+
+  if(x.drawing){
+    let im=new Image();
+    im.onload=()=>{ctx.drawImage(im,0,0,pad.width/scale,pad.height/scale)};
+    im.src=x.drawing;
+  }
+  view('form');
 }
 
 $('save').onclick=async()=>{
- let imgs=editingPhotos.slice();
- let a=JSON.parse(localStorage.getItem('decoContacts')||'[]');
- let obj={name:$('name').value,company:$('company').value,phone:$('phone').value,email:$('email').value,project:$('project').value,status:$('status').value,follow:$('follow').value,note:$('note').value,drawing:noteMode==='stylus'?pad.toDataURL():'',noteType:noteMode,photos:imgs};
- if(editingId!==null){let i=a.findIndex(c=>c.id===editingId);if(i>=0)a[i]={...a[i],...obj};alert('Contact modifié')}
- else {obj.id=Date.now();a.push(obj);alert('Contact enregistré')}
- try{
-   localStorage.setItem('decoContacts',JSON.stringify(a));
- }catch(e){
-   alert('Le contact n’a pas pu être enregistré. Le stockage photo est plein. Les photos sont automatiquement réduites dans cette version ; supprime quelques anciennes photos puis réessaie.');
-   return;
- }
- reset();view('list');
+  const obj={
+    name:$('name').value,
+    company:$('company').value,
+    phone:$('phone').value,
+    email:$('email').value,
+    project:$('project').value,
+    status:$('status').value,
+    follow:$('follow').value,
+    note:$('note').value,
+    drawing:noteMode==='stylus'?pad.toDataURL():'',
+    noteType:noteMode,
+    photos:editingPhotos.slice()
+  };
+
+  try{
+    if(editingId!==null){
+      const old=await getContact(editingId);
+      if(!old)return;
+      await dbPut({...old,...obj,id:editingId});
+      alert('Contact modifié');
+    }else{
+      obj.id=Date.now();
+      await dbPut(obj);
+      alert('Contact enregistré');
+    }
+  }catch(e){
+    console.error(e);
+    alert('Le contact n’a pas pu être enregistré. Vérifie l’espace de stockage disponible sur l’iPad puis réessaie.');
+    return;
+  }
+
+  reset();
+  view('list');
 };
 
-function render(){
- let a=JSON.parse(localStorage.getItem('decoContacts')||'[]'),
- q=$('search').value.toLowerCase(),
- sf=$('statusFilter').value,
- b=$('listbox');
- a=a.filter(x=>(x.name+' '+x.company+' '+x.project+' '+x.phone).toLowerCase().includes(q));
- if(sf) a=a.filter(x=>x.status===sf);
- b.innerHTML=a.length?'':'<div class="empty">Aucun contact.</div>';
- a.slice().reverse().forEach(x=>{let d=document.createElement('div');d.className='contact';d.innerHTML='<div><b>'+esc(x.name||'Sans nom')+'</b><div class="muted">'+esc(x.company)+' · '+esc(x.project)+'</div><div class="muted">'+esc(x.phone)+'</div></div><span class="badge">'+esc(x.status)+'</span>';d.onclick=()=>showContact(x.id);b.appendChild(d)})
+async function render(){
+  let a=[];
+  try{
+    a=await getContacts();
+  }catch(e){
+    console.error(e);
+    $('listbox').innerHTML='<div class="empty">Impossible de charger les contacts.</div>';
+    return;
+  }
+
+  let q=$('search').value.toLowerCase();
+  let sf=$('statusFilter').value;
+  let b=$('listbox');
+
+  a=a.filter(x=>(x.name+' '+x.company+' '+x.project+' '+x.phone).toLowerCase().includes(q));
+  if(sf)a=a.filter(x=>x.status===sf);
+
+  b.innerHTML=a.length?'':'<div class="empty">Aucun contact.</div>';
+
+  a.slice().sort((u,v)=>(Number(v.id)||0)-(Number(u.id)||0)).forEach(x=>{
+    let d=document.createElement('div');
+    d.className='contact';
+    d.innerHTML='<div><b>'+esc(x.name||'Sans nom')+'</b><div class="muted">'+esc(x.company)+' · '+esc(x.project)+'</div><div class="muted">'+esc(x.phone)+'</div></div><span class="badge">'+esc(x.status)+'</span>';
+    d.onclick=()=>showContact(x.id);
+    b.appendChild(d);
+  });
 }
 
-function showContact(id){
- let a=JSON.parse(localStorage.getItem('decoContacts')||'[]'),x=a.find(c=>c.id===id);if(!x)return;
- $('detailTitle').textContent=x.name||'Contact';
- let h='';
- const row=(label,val)=>val?'<div class="detailRow"><div class="detailLabel">'+label+'</div><div class="detailValue">'+esc(val)+'</div></div>':'';
- h+=row('Société',x.company)+row('Téléphone',x.phone)+row('E-mail',x.email)+row('Bateau / Projet',x.project)+row('Statut',x.status)+row('Rappel',x.follow)+row('Note au clavier',x.note);
- if(x.photos&&x.photos.length){h+='<div class="detailRow"><div class="detailLabel">Photos du projet</div><div class="detailPhotos">'+x.photos.map(src=>'<img src="'+src+'">').join('')+'</div></div>'}
- if(x.drawing){h+='<div class="detailRow"><div class="detailLabel">Note manuscrite au stylet</div><img class="drawing" src="'+x.drawing+'"></div>'}
- h+='<div class="editbar"><button class="orange" onclick="editContact('+x.id+')">✏️ Modifier</button><button class="alt" onclick="view(\'list\')">← Contacts</button></div>';
- $('detailBox').innerHTML=h||'<div class="empty">Aucune information.</div>';view('detail')
+async function showContact(id){
+  let x=await getContact(id);
+  if(!x)return;
+
+  $('detailTitle').textContent=x.name||'Contact';
+  let h='';
+  const row=(label,val)=>val
+    ? '<div class="detailRow"><div class="detailLabel">'+label+'</div><div class="detailValue">'+esc(val)+'</div></div>'
+    : '';
+
+  h+=row('Société',x.company)
+    +row('Téléphone',x.phone)
+    +row('E-mail',x.email)
+    +row('Bateau / Projet',x.project)
+    +row('Statut',x.status)
+    +row('Rappel',x.follow)
+    +row('Note au clavier',x.note);
+
+  if(x.photos&&x.photos.length){
+    h+='<div class="detailRow"><div class="detailLabel">Photos du projet</div><div class="detailPhotos">'
+      +x.photos.map(src=>'<img src="'+src+'">').join('')
+      +'</div></div>';
+  }
+
+  if(x.drawing){
+    h+='<div class="detailRow"><div class="detailLabel">Note manuscrite au stylet</div><img class="drawing" src="'+x.drawing+'"></div>';
+  }
+
+  h+='<div class="editbar"><button class="orange" onclick="editContact('+x.id+')">✏️ Modifier</button><button class="alt" onclick="view(\'list\')">← Contacts</button></div>';
+  $('detailBox').innerHTML=h||'<div class="empty">Aucune information.</div>';
+  view('detail');
 }
+
 $('search').oninput=render;
 $('statusFilter').onchange=render;
+
+/* Prépare la base et migre automatiquement les anciens contacts. */
+(async()=>{
+  try{
+    await migrateOldContacts();
+  }catch(e){
+    console.error('Initialisation stockage:',e);
+  }
+})();
 </script>
 </body>
 </html>
