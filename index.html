@@ -38,6 +38,11 @@ canvas{width:100%;height:250px;border:2px dashed #c8d8da;border-radius:14px;back
 
 <section id="home" class="view on">
 <div class="card"><div class="actions"><button id="new">＋ Nouveau contact</button><button class="alt" id="contactsBtn">📋 Mes contacts</button></div></div>
+<div class="card" id="planningCard">
+<h2>📅 Planning des projets</h2>
+<div class="muted" style="margin-bottom:14px">Les deux prochains mois s'affichent automatiquement.</div>
+<div id="planningMonths"></div>
+</div>
 <div class="card">
 <h2>💾 Sauvegarde des contacts</h2>
 <div class="muted" style="margin-bottom:12px">Sauvegarde tous tes clients, leurs informations, photos et notes dans un fichier que tu peux conserver dans l’app Fichiers ou sur iCloud Drive.</div>
@@ -119,7 +124,7 @@ let dbPromise=null;
 function openDB(){
   if(dbPromise) return dbPromise;
   dbPromise=new Promise((resolve,reject)=>{
-    const req=indexedDB.open(DB_NAME,DB_VERSION);
+    const req=indexedDB.open(DB_NAME);
     req.onupgradeneeded=()=>{
       const db=req.result;
       if(!db.objectStoreNames.contains(STORE)){
@@ -231,6 +236,7 @@ async function restoreContacts(file){
 
     setBackupStatus('✅ Restauration terminée : '+contacts.length+' contact(s) restauré(s), avec photos et notes.');
     render();
+    if(window.refreshPlanning) await window.refreshPlanning();
   }catch(e){
     console.error('Restauration:',e);
     setBackupStatus('❌ Impossible de restaurer cette sauvegarde : '+(e.message||'fichier invalide'),true);
@@ -306,6 +312,7 @@ function view(id){
   $(id).classList.add('on');
   scrollTo(0,0);
   if(id==='list') render();
+  if(id==='home' && window.refreshPlanning) window.refreshPlanning();
 }
 
 $('new').onclick=()=>newContact();
@@ -553,6 +560,7 @@ $('save').onclick=async()=>{
   }
 
   reset();
+  if(window.refreshPlanning) await window.refreshPlanning();
   view('list');
 };
 
@@ -638,6 +646,7 @@ async function deleteProject(contactId, projectIndex){
   updated.noteType=first ? first.noteType : 'text';
   updated.photos=first ? first.photos : [];
   await dbPut(updated);
+  if(window.refreshPlanning) await window.refreshPlanning();
   await showContact(contactId);
 }
 $('search').oninput=render;
@@ -653,6 +662,74 @@ $('restoreFile').onchange=async(e)=>{
   await restoreContacts(file);
   e.target.value='';
 };
+
+/* Calendrier visuel avec projets : actualisation à chaque retour à l'accueil. */
+(async function(){
+  const box=document.getElementById('planningMonths');
+  if(!box)return;
+  const months=['Janvier','Février','Mars','Avril','Mai','Juin','Juillet','Août','Septembre','Octobre','Novembre','Décembre'];
+  const days=['Lun','Mar','Mer','Jeu','Ven','Sam','Dim'];
+  const colors={
+    'Demande':'#2196f3','Devis':'#ff9800','En attente':'#9c27b0','Accepté':'#2e7d32',
+    'Acompte':'#00838f','À produire':'#1565c0','À poser':'#00897b','À facturer':'#e53935'
+  };
+  function keyFromDate(v){
+    if(!v)return null;
+    const m=String(v).match(/^(\d{4})-(\d{2})-(\d{2})/);
+    if(m)return m[1]+'-'+m[2]+'-'+m[3];
+    const d=new Date(v); if(Number.isNaN(d.getTime()))return null;
+    return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+  }
+  function escLocal(v){return String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
+  function monthHTML(year,month,projectsByDate){
+    const first=new Date(year,month,1), last=new Date(year,month+1,0);
+    const start=(first.getDay()+6)%7;
+    let html='<div style="border:1px solid #d8e2e5;border-radius:14px;padding:12px;margin-bottom:14px;background:#fff">';
+    html+='<h3 style="margin:0 0 10px;color:#17444d;text-align:center">'+months[month]+' '+year+'</h3>';
+    html+='<div style="display:grid;grid-template-columns:repeat(7,1fr);gap:4px">';
+    days.forEach(d=>html+='<div style="text-align:center;font-weight:700;font-size:12px;color:#6b858b;padding:4px">'+d+'</div>');
+    for(let i=0;i<start;i++)html+='<div style="min-height:55px"></div>';
+    const today=new Date();
+    for(let d=1;d<=last.getDate();d++){
+      const key=year+'-'+String(month+1).padStart(2,'0')+'-'+String(d).padStart(2,'0');
+      const isToday=d===today.getDate()&&month===today.getMonth()&&year===today.getFullYear();
+      let cell='<div style="min-height:62px;border:1px solid #e3eaec;border-radius:8px;padding:4px;background:'+(isToday?'#eef9fa':'#fff')+';font-size:12px;overflow:hidden">';
+      cell+='<b style="color:'+(isToday?'#087d87':'#4d666c')+'">'+d+'</b>';
+      for(const item of (projectsByDate[key]||[])){
+        const bg=colors[item.status]||'#607d8b';
+        cell+='<div onclick="showContact('+Number(item.contactId)+')" style="margin-top:3px;padding:3px 4px;border-radius:5px;background:'+bg+';color:#fff;font-weight:700;line-height:1.15;cursor:pointer;white-space:normal">'+escLocal(item.name)+'<div style="font-size:10px;font-weight:500;opacity:.95">'+escLocal(item.status)+'</div></div>';
+      }
+      cell+='</div>'; html+=cell;
+    }
+    html+='</div></div>'; return html;
+  }
+  async function refreshPlanning(){
+    if(!box)return;
+    let projectsByDate={};
+    try{
+      const contacts=await getContacts();
+      for(const c of contacts||[]){
+        for(const p of (Array.isArray(c.projects)?c.projects:[])){
+          const dateKey=keyFromDate(p.follow);
+          if(!dateKey)continue;
+          if(!projectsByDate[dateKey])projectsByDate[dateKey]=[];
+          projectsByDate[dateKey].push({
+            name:p.name||c.company||c.project||c.boat||'Projet',
+            status:normalizeStatus(p.status),
+            contactId:c.id
+          });
+        }
+      }
+    }catch(e){
+      console.error('Calendrier projets:',e);
+    }
+    const now=new Date();
+    const n2=new Date(now.getFullYear(),now.getMonth()+1,1);
+    box.innerHTML=monthHTML(now.getFullYear(),now.getMonth(),projectsByDate)+monthHTML(n2.getFullYear(),n2.getMonth(),projectsByDate);
+  }
+  window.refreshPlanning=refreshPlanning;
+  await refreshPlanning();
+})();
 
 /* Prépare la base et migre automatiquement les anciens contacts. */
 (async()=>{
