@@ -22,7 +22,7 @@ input,select,textarea{width:100%;padding:13px;border:1px solid #d4e0e2;border-ra
 .toolbar{display:flex;gap:8px;flex-wrap:wrap}.toolbar button{min-height:42px;padding:9px 12px;font-size:14px}
 canvas{width:100%;height:250px;border:2px dashed #c8d8da;border-radius:14px;background:#fff;touch-action:none}
 .photos{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}.photos img{width:100%;aspect-ratio:1;object-fit:cover;border-radius:12px}
-.contact{padding:13px 0;border-bottom:1px solid #e6eeee;display:flex;justify-content:space-between;gap:10px;cursor:pointer}.contact:last-child{border-bottom:0}.contact:active{background:#f1f8f9;border-radius:12px}.badge{background:#edf6f7;color:var(--d);padding:6px 9px;border-radius:10px;font-size:12px;white-space:nowrap}.muted{color:var(--muted);font-size:13px}.detailRow{padding:9px 0;border-bottom:1px solid #e8eeee}.detailLabel{font-size:11px;font-weight:800;color:#668087;text-transform:uppercase;letter-spacing:.5px}.detailValue{font-size:16px;margin-top:2px;white-space:pre-wrap}.detailPhotos{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:10px}.detailPhotos img{width:100%;aspect-ratio:1;object-fit:cover;border-radius:12px}.drawing{width:100%;border:1px solid #d4e0e2;border-radius:12px;margin-top:8px;background:#fff}.projectCard{border:1px solid #dbe7e9;border-radius:14px;padding:12px;margin-top:10px;background:#fbfdfd}.projectHead{display:flex;justify-content:space-between;align-items:flex-start;gap:10px}.projectActions{display:flex;gap:8px;margin-top:10px;flex-wrap:wrap}.projectActions button{min-height:40px;padding:9px 12px;font-size:14px}
+.contact{padding:13px 0;border-bottom:1px solid #e6eeee;display:flex;justify-content:space-between;gap:10px;cursor:pointer}.contact:last-child{border-bottom:0}.contact:active{background:#f1f8f9;border-radius:12px}.badge{background:#edf6f7;color:var(--d);padding:6px 9px;border-radius:10px;font-size:12px;white-space:nowrap}.muted{color:var(--muted);font-size:13px}.detailRow{padding:9px 0;border-bottom:1px solid #e8eeee}.detailLabel{font-size:11px;font-weight:800;color:#668087;text-transform:uppercase;letter-spacing:.5px}.detailValue{font-size:16px;margin-top:2px;white-space:pre-wrap}.detailPhotos{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:10px}.detailPhotos img{width:100%;aspect-ratio:1;object-fit:cover;border-radius:12px}.drawing{width:100%;border:1px solid #d4e0e2;border-radius:12px;margin-top:8px;background:#fff}.projectCard{border:1px solid #dbe7e9;border-radius:14px;padding:12px;margin-top:10px;background:#fbfdfd}.projectHead{display:flex;justify-content:space-between;align-items:flex-start;gap:10px}.projectStatus{display:inline-flex;align-items:center;gap:6px;padding:6px 9px;border-radius:999px;font-size:12px;font-weight:800;white-space:nowrap}.status-demande{background:#2196f3;color:#fff;box-shadow:0 2px 5px rgba(33,150,243,.28)}.status-devis{background:#ff9800;color:#fff;box-shadow:0 2px 5px rgba(255,152,0,.28)}.status-attente{background:#9c27b0;color:#fff;box-shadow:0 2px 5px rgba(156,39,176,.28)}.status-accepte{background:#2e7d32;color:#fff;box-shadow:0 2px 5px rgba(46,125,50,.28)}.status-produire{background:#1565c0;color:#fff;box-shadow:0 2px 5px rgba(21,101,192,.28)}.status-poser{background:#00897b;color:#fff;box-shadow:0 2px 5px rgba(0,137,123,.28)}.status-acompte{background:#00838f;color:#fff;box-shadow:0 2px 5px rgba(0,131,143,.28)}.status-facturer{background:#e53935;color:#fff;box-shadow:0 2px 5px rgba(229,57,53,.28)}.projectMini{border:1px solid #e2ebed;border-radius:12px;padding:10px;margin-top:8px;background:#fff}.projectMiniTop{display:flex;justify-content:space-between;gap:8px;align-items:center}.projectMiniName{font-weight:800}.amounts{display:flex;gap:14px;flex-wrap:wrap;margin-top:7px}.amount{font-size:12px;color:#5e7479}.amount strong{color:#17343a}.projectActions{display:flex;gap:8px;margin-top:10px;flex-wrap:wrap}.projectActions button{min-height:40px;padding:9px 12px;font-size:14px}
 .search{margin-bottom:10px}.empty{text-align:center;color:var(--muted);padding:25px 10px}.top{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}.editbar{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:14px}
 @media(max-width:650px){.row{grid-template-columns:1fr}.actions{grid-template-columns:1fr 1fr}main{padding:10px}}
 </style>
@@ -59,8 +59,9 @@ canvas{width:100%;height:250px;border:2px dashed #c8d8da;border-radius:14px;back
 <div class="row"><div><label>Téléphone</label><input id="phone" type="tel" placeholder="06 00 00 00 00"></div><div><label>E-mail</label><input id="email" type="email" placeholder="contact@entreprise.fr"></div></div>
 <label>Bateau / Projet</label><input id="project" placeholder="Catamaran, covering, décoration…">
 <div class="row"><div><label>Statut</label><select id="status">
-<option>À commander</option><option>Devis</option><option>À rappeler</option><option>À poser</option><option>À facturer</option><option>À encaisser</option><option>Terminé</option>
+<option>Demande</option><option>Devis</option><option>En attente</option><option>Accepté</option><option value="Acompte">Acompte</option><option>À produire</option><option>À poser</option><option>À facturer</option>
 </select></div><div><label>Rappel</label><input id="follow" type="date"></div></div>
+<div class="row"><div><label>Montant du devis (€)</label><input id="quoteAmount" type="number" min="0" step="0.01" inputmode="decimal" placeholder="0,00"></div><div><label>Montant de la facture (€)</label><input id="invoiceAmount" type="number" min="0" step="0.01" inputmode="decimal" placeholder="0,00"></div></div>
 <div class="card">
 <h2>📝 Note</h2>
 <div class="toolbar" style="margin-bottom:10px">
@@ -88,7 +89,7 @@ canvas{width:100%;height:250px;border:2px dashed #c8d8da;border-radius:14px;back
 <div class="card">
 <input class="search" id="search" placeholder="🔎 Rechercher un nom, société, bateau…">
 <select id="statusFilter" style="margin-bottom:10px">
-<option value="">Tous les statuts</option><option>À commander</option><option>Devis</option><option>À rappeler</option><option>À poser</option><option>À facturer</option><option>À encaisser</option><option>Terminé</option>
+<option value="">Tous les statuts</option><option>Demande</option><option>Devis</option><option>En attente</option><option>Accepté</option><option>Acompte</option><option>À produire</option><option>À poser</option><option>À facturer</option>
 </select>
 <div id="listbox"></div>
 </div>
@@ -257,21 +258,37 @@ async function migrateOldContacts(){
   try{ localStorage.removeItem('decoContacts'); }catch(e){}
 }
 
+function normalizeStatus(s){
+  const map={'À commander':'Demande','À rappeler':'En attente','À encaisser':'À facturer','Terminé':'À facturer'};
+  return map[s]||s||'Demande';
+}
 function normalizeContact(c){
   if(!c) return c;
   if(!Array.isArray(c.projects)){
     c.projects=[{
       id:'p-'+String(c.id),
       name:c.project||'Projet principal',
-      status:c.status||'À commander',
+      status:normalizeStatus(c.status),
       follow:c.follow||'',
+      quoteAmount:c.quoteAmount??'',
+      invoiceAmount:c.invoiceAmount??'',
       note:c.note||'',
       drawing:c.drawing||'',
       noteType:c.noteType||'keyboard',
       photos:Array.isArray(c.photos)?c.photos.slice():[]
     }];
+  } else {
+    c.projects=c.projects.map(p=>({...p,status:normalizeStatus(p.status),quoteAmount:p.quoteAmount??'',invoiceAmount:p.invoiceAmount??''}));
   }
   return c;
+}
+function money(v){
+  const n=Number(v);
+  if(!Number.isFinite(n)||n===0) return '';
+  return new Intl.NumberFormat('fr-FR',{style:'currency',currency:'EUR',maximumFractionDigits:2}).format(n);
+}
+function statusClass(s){
+  return {'Demande':'status-demande','Devis':'status-devis','En attente':'status-attente','Accepté':'status-accepte','Acompte':'status-acompte','À produire':'status-produire','À poser':'status-poser','À facturer':'status-facturer'}[s]||'status-demande';
 }
 
 async function getContacts(){
@@ -425,7 +442,7 @@ function clearCanvas(){
 
 function reset(){
   ['name','company','boat','phone','email','project','follow','note'].forEach(i=>$(i).value='');
-  $('status').value='À commander';
+  $('status').value='Demande';
   $('photoCamera').value='';
   $('photoLibrary').value='';
   $('photos').innerHTML='';
@@ -467,8 +484,10 @@ async function editContact(id,projectId=null,projectIndex=null){
   $('phone').value=x.phone||'';
   $('email').value=x.email||'';
   $('project').value=p ? (p.name||'') : '';
-  $('status').value=p ? (p.status||'À commander') : 'À commander';
+  $('status').value=p ? normalizeStatus(p.status) : 'Demande';
   $('follow').value=p ? (p.follow||'') : '';
+  $('quoteAmount').value=p && p.quoteAmount!=='' && p.quoteAmount!=null ? p.quoteAmount : '';
+  $('invoiceAmount').value=p && p.invoiceAmount!=='' && p.invoiceAmount!=null ? p.invoiceAmount : '';
   $('note').value=p ? (p.note||'') : '';
   $('photoCamera').value='';
   $('photoLibrary').value='';
@@ -490,6 +509,8 @@ $('save').onclick=async()=>{
     name:$('project').value.trim() || 'Projet sans nom',
     status:$('status').value,
     follow:$('follow').value,
+    quoteAmount:$('quoteAmount').value===''?'':Number($('quoteAmount').value),
+    invoiceAmount:$('invoiceAmount').value===''?'':Number($('invoiceAmount').value),
     note:$('note').value,
     drawing:noteMode==='stylus'?pad.toDataURL():'',
     noteType:noteMode,
@@ -511,7 +532,7 @@ $('save').onclick=async()=>{
       const first=projects[0]||project;
       const updated={...old, name:$('name').value, company:$('company').value, boat:$('boat').value, phone:$('phone').value, email:$('email').value, projects};
       // Keep legacy fields synchronized with the first project for compatibility.
-      updated.project=first.name; updated.status=first.status; updated.follow=first.follow; updated.note=first.note; updated.drawing=first.drawing; updated.noteType=first.noteType; updated.photos=first.photos;
+      updated.project=first.name; updated.status=first.status; updated.follow=first.follow; updated.quoteAmount=first.quoteAmount; updated.invoiceAmount=first.invoiceAmount; updated.note=first.note; updated.drawing=first.drawing; updated.noteType=first.noteType; updated.photos=first.photos;
       await dbPut(updated);
       alert(editingProjectIndex!==null && editingProjectIndex>=0?'Projet modifié':'Projet ajouté au client');
     }else{
@@ -520,7 +541,7 @@ $('save').onclick=async()=>{
         name:$('name').value, company:$('company').value, boat:$('boat').value, phone:$('phone').value, email:$('email').value,
         projects:[project],
         // Legacy fields kept for compatibility with older versions.
-        project:project.name,status:project.status,follow:project.follow,note:project.note,drawing:project.drawing,noteType:project.noteType,photos:project.photos
+        project:project.name,status:project.status,follow:project.follow,quoteAmount:project.quoteAmount,invoiceAmount:project.invoiceAmount,note:project.note,drawing:project.drawing,noteType:project.noteType,photos:project.photos
       };
       await dbPut(obj);
       alert('Contact enregistré');
@@ -550,14 +571,14 @@ async function render(){
   let b=$('listbox');
 
   a=a.filter(x=>{ const ps=(x.projects||[]).map(p=>p.name+' '+p.status+' '+p.note).join(' '); return (x.name+' '+x.company+' '+x.boat+' '+x.phone+' '+x.email+' '+ps).toLowerCase().includes(q); });
-  if(sf)a=a.filter(x=>x.status===sf);
+  if(sf)a=a.filter(x=>(x.projects||[]).some(p=>normalizeStatus(p.status)===sf));
 
   b.innerHTML=a.length?'':'<div class="empty">Aucun contact.</div>';
 
   a.slice().sort((u,v)=>(Number(v.id)||0)-(Number(u.id)||0)).forEach(x=>{
     let d=document.createElement('div');
     d.className='contact';
-    const ps=x.projects||[]; const names=ps.map(p=>p.name).filter(Boolean).join(' · '); const company=(x.company||'').trim(); const boat=(x.boat||'').trim(); const displayName=company || boat || 'Sans société / bateau'; const secondary=company && boat ? boat : ''; d.innerHTML='<div><b>'+esc(displayName)+'</b>'+ (secondary ? '<div class="muted">'+esc(secondary)+'</div>' : '') +'<div class="muted">'+esc(names||x.project||'')+'</div><div class="muted">'+esc(x.phone)+' · '+ps.length+' projet(s)</div></div><span class="badge">'+esc((ps[0]&&ps[0].status)||x.status||'')+'</span>'; 
+    const ps=x.projects||[]; const company=(x.company||'').trim(); const boat=(x.boat||'').trim(); const displayName=company || boat || 'Sans société / bateau'; const secondary=company && boat ? boat : ''; const mini=ps.map(p=>'<div class="projectMini"><div class="projectMiniTop"><div class="projectMiniName">⛵ '+esc(p.name||'Projet sans nom')+'</div><span class="projectStatus '+statusClass(normalizeStatus(p.status))+'">'+esc(normalizeStatus(p.status))+'</span></div><div class="amounts"><span class="amount">Devis <strong>'+esc(p.quoteAmount!==''&&p.quoteAmount!=null?money(p.quoteAmount):'—')+'</strong></span><span class="amount">Facture <strong>'+esc(p.invoiceAmount!==''&&p.invoiceAmount!=null?money(p.invoiceAmount):'—')+'</strong></span></div></div>').join(''); d.innerHTML='<div style="width:100%"><b>'+esc(displayName)+'</b>'+ (secondary ? '<div class="muted">'+esc(secondary)+'</div>' : '') +'<div class="muted" style="margin-top:3px">'+esc(x.phone)+' · '+ps.length+' projet(s)</div>'+mini+'</div>'; 
     d.onclick=()=>showContact(x.id);
     b.appendChild(d);
   });
@@ -575,11 +596,12 @@ async function showContact(id){
 
   h+=row('Société',x.company)+row('Téléphone',x.phone)+row('E-mail',x.email);
   h+='<div class="detailRow"><div class="detailLabel">Projets</div><div class="projectActions"><button onclick="newProject('+x.id+')">➕ Nouveau projet</button></div>'
-    +'<div class="muted" style="margin-top:8px">Ce client peut maintenant avoir plusieurs projets indépendants, avec leurs photos, notes, statut et rappel.</div></div>';
+    +'<div class="muted" style="margin-top:8px">Chaque projet possède son statut, son montant de devis et son montant de facture, en plus de ses photos et notes.</div></div>';
 
   (x.projects||[]).forEach((p,projectIndex)=>{
     h+='<div class="projectCard">'+
-      '<div class="projectHead"><div><b>⛵ '+esc(p.name||'Projet sans nom')+'</b><div class="muted">'+esc(p.status||'')+(p.follow?' · Rappel : '+esc(p.follow):'')+'</div></div><span class="badge">'+esc(p.status||'')+'</span></div>'+
+      '<div class="projectHead"><div><b>⛵ '+esc(p.name||'Projet sans nom')+'</b><div class="muted">'+esc(normalizeStatus(p.status))+(p.follow?' · Rappel : '+esc(p.follow):'')+'</div></div><span class="projectStatus '+statusClass(normalizeStatus(p.status))+'">'+esc(normalizeStatus(p.status))+'</span></div>'+
+      ((p.quoteAmount!==''&&p.quoteAmount!=null)||(p.invoiceAmount!==''&&p.invoiceAmount!=null)?'<div class="amounts">'+(p.quoteAmount!==''&&p.quoteAmount!=null?'<span class="amount">Devis <strong>'+esc(money(p.quoteAmount))+'</strong></span>':'')+(p.invoiceAmount!==''&&p.invoiceAmount!=null?'<span class="amount">Facture <strong>'+esc(money(p.invoiceAmount))+'</strong></span>':'')+'</div>':'')+
       (p.note?'<div class="detailValue" style="margin-top:9px">'+esc(p.note)+'</div>':'')+
       (p.photos&&p.photos.length?'<div class="detailPhotos">'+p.photos.map(src=>'<img src="'+src+'">').join('')+'</div>':'')+
       (p.drawing?'<img class="drawing" src="'+p.drawing+'">':'')+
