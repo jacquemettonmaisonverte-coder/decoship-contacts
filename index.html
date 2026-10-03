@@ -36,6 +36,16 @@ canvas{width:100%;height:250px;border:2px dashed #c8d8da;border-radius:14px;back
 
 <section id="home" class="view on">
 <div class="card"><div class="actions"><button id="new">＋ Nouveau contact</button><button class="alt" id="contactsBtn">📋 Mes contacts</button></div></div>
+<div class="card">
+<h2>💾 Sauvegarde des contacts</h2>
+<div class="muted" style="margin-bottom:12px">Sauvegarde tous tes clients, leurs informations, photos et notes dans un fichier que tu peux conserver dans l’app Fichiers ou sur iCloud Drive.</div>
+<div class="actions">
+<button id="backupBtn">💾 Sauvegarder</button>
+<button class="alt" id="restoreBtn">♻️ Restaurer</button>
+</div>
+<input id="restoreFile" type="file" accept="application/json,.json" style="display:none">
+<div id="backupStatus" class="muted" style="margin-top:10px"></div>
+</div>
 <div class="card"><h2>Prise de contact rapide</h2><div class="muted">Une fiche client, les photos du bateau et tes notes au stylet, réunis au même endroit.</div></div>
 </section>
 
@@ -148,6 +158,79 @@ async function dbDelete(id){
     tx.onerror=()=>reject(tx.error);
     tx.onabort=()=>reject(tx.error||new Error('Transaction annulée'));
   });
+}
+
+/* =========================
+   SAUVEGARDE / RESTAURATION
+   ========================= */
+async function backupContacts(){
+  const contacts=await getContacts();
+  const payload={
+    app:'DECOSHIP Contacts',
+    backupVersion:1,
+    createdAt:new Date().toISOString(),
+    contacts
+  };
+  const json=JSON.stringify(payload);
+  const blob=new Blob([json],{type:'application/json'});
+  const stamp=new Date().toISOString().slice(0,19).replace(/[:T]/g,'-');
+  const filename='DECOSHIP-Contacts-Sauvegarde-'+stamp+'.json';
+  const file=new File([blob],filename,{type:'application/json'});
+
+  /* Sur iPad, la feuille de partage permet de choisir Fichiers/iCloud Drive. */
+  if(navigator.share && navigator.canShare && navigator.canShare({files:[file]})){
+    try{
+      await navigator.share({title:'Sauvegarde DECOSHIP Contacts',files:[file]});
+      setBackupStatus('✅ Sauvegarde prête : '+contacts.length+' contact(s), photos et notes incluses.');
+      return;
+    }catch(e){
+      if(e && e.name==='AbortError') return;
+    }
+  }
+
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');
+  a.href=url; a.download=filename; document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(()=>URL.revokeObjectURL(url),2000);
+  setBackupStatus('✅ Sauvegarde créée : '+contacts.length+' contact(s), photos et notes incluses.');
+}
+
+function setBackupStatus(msg,error=false){
+  const el=$('backupStatus');
+  if(!el) return;
+  el.textContent=msg;
+  el.style.color=error?'#b3261e':'';
+}
+
+async function restoreContacts(file){
+  if(!file) return;
+  try{
+    const text=await file.text();
+    const payload=JSON.parse(text);
+    const contacts=Array.isArray(payload) ? payload : payload.contacts;
+    if(!Array.isArray(contacts)) throw new Error('Format de sauvegarde invalide.');
+    if(contacts.some(c=>!c || c.id==null)) throw new Error('La sauvegarde contient une fiche invalide.');
+
+    const ok=confirm('⚠️ Restaurer cette sauvegarde ?\n\nCela remplacera les contacts actuellement présents sur cet iPad par les '+contacts.length+' contact(s) de la sauvegarde.\n\nLes photos et notes seront également restaurées.');
+    if(!ok) return;
+
+    const db=await openDB();
+    await new Promise((resolve,reject)=>{
+      const tx=db.transaction(STORE,'readwrite');
+      const store=tx.objectStore(STORE);
+      store.clear();
+      for(const contact of contacts) store.put(contact);
+      tx.oncomplete=resolve;
+      tx.onerror=()=>reject(tx.error);
+      tx.onabort=()=>reject(tx.error||new Error('Restauration annulée'));
+    });
+
+    setBackupStatus('✅ Restauration terminée : '+contacts.length+' contact(s) restauré(s), avec photos et notes.');
+    render();
+  }catch(e){
+    console.error('Restauration:',e);
+    setBackupStatus('❌ Impossible de restaurer cette sauvegarde : '+(e.message||'fichier invalide'),true);
+  }
 }
 
 /* Migration automatique des anciens contacts V8 stockés dans localStorage.
@@ -472,6 +555,17 @@ async function showContact(id){
 
 $('search').oninput=render;
 $('statusFilter').onchange=render;
+
+$('backupBtn').onclick=async()=>{
+  try{ await backupContacts(); }
+  catch(e){ console.error('Sauvegarde:',e); setBackupStatus('❌ La sauvegarde n’a pas pu être créée.',true); }
+};
+$('restoreBtn').onclick=()=>$('restoreFile').click();
+$('restoreFile').onchange=async(e)=>{
+  const file=e.target.files && e.target.files[0];
+  await restoreContacts(file);
+  e.target.value='';
+};
 
 /* Prépare la base et migre automatiquement les anciens contacts. */
 (async()=>{
