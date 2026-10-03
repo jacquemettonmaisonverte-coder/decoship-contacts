@@ -55,6 +55,7 @@ canvas{width:100%;height:250px;border:2px dashed #c8d8da;border-radius:14px;back
 <div class="top"><h2 id="formTitle">Nouveau contact</h2><button class="alt" id="back1">← Retour</button></div>
 <div class="card">
 <div class="row"><div><label>Nom / Prénom</label><input id="name" autocomplete="name" placeholder="Jean Dupont"></div><div><label>Société</label><input id="company" placeholder="Entreprise"></div></div>
+<div><label>Nom du bateau</label><input id="boat" placeholder="Nom du bateau"></div>
 <div class="row"><div><label>Téléphone</label><input id="phone" type="tel" placeholder="06 00 00 00 00"></div><div><label>E-mail</label><input id="email" type="email" placeholder="contact@entreprise.fr"></div></div>
 <label>Bateau / Projet</label><input id="project" placeholder="Catamaran, covering, décoration…">
 <div class="row"><div><label>Statut</label><select id="status">
@@ -423,7 +424,7 @@ function clearCanvas(){
 }
 
 function reset(){
-  ['name','company','phone','email','project','follow','note'].forEach(i=>$(i).value='');
+  ['name','company','boat','phone','email','project','follow','note'].forEach(i=>$(i).value='');
   $('status').value='À commander';
   $('photoCamera').value='';
   $('photoLibrary').value='';
@@ -462,6 +463,7 @@ async function editContact(id,projectId=null,projectIndex=null){
   $('save').textContent=projectId===null?'💾 Enregistrer les modifications':'💾 Enregistrer le projet';
   $('name').value=x.name||'';
   $('company').value=x.company||'';
+  $('boat').value=x.boat||'';
   $('phone').value=x.phone||'';
   $('email').value=x.email||'';
   $('project').value=p ? (p.name||'') : '';
@@ -507,7 +509,7 @@ $('save').onclick=async()=>{
         projects.push(project);
       }
       const first=projects[0]||project;
-      const updated={...old, name:$('name').value, company:$('company').value, phone:$('phone').value, email:$('email').value, projects};
+      const updated={...old, name:$('name').value, company:$('company').value, boat:$('boat').value, phone:$('phone').value, email:$('email').value, projects};
       // Keep legacy fields synchronized with the first project for compatibility.
       updated.project=first.name; updated.status=first.status; updated.follow=first.follow; updated.note=first.note; updated.drawing=first.drawing; updated.noteType=first.noteType; updated.photos=first.photos;
       await dbPut(updated);
@@ -515,7 +517,7 @@ $('save').onclick=async()=>{
     }else{
       const obj={
         id:Date.now(),
-        name:$('name').value, company:$('company').value, phone:$('phone').value, email:$('email').value,
+        name:$('name').value, company:$('company').value, boat:$('boat').value, phone:$('phone').value, email:$('email').value,
         projects:[project],
         // Legacy fields kept for compatibility with older versions.
         project:project.name,status:project.status,follow:project.follow,note:project.note,drawing:project.drawing,noteType:project.noteType,photos:project.photos
@@ -547,7 +549,7 @@ async function render(){
   let sf=$('statusFilter').value;
   let b=$('listbox');
 
-  a=a.filter(x=>{ const ps=(x.projects||[]).map(p=>p.name+' '+p.status+' '+p.note).join(' '); return (x.name+' '+x.company+' '+x.phone+' '+ps).toLowerCase().includes(q); });
+  a=a.filter(x=>{ const ps=(x.projects||[]).map(p=>p.name+' '+p.status+' '+p.note).join(' '); return (x.name+' '+x.company+' '+x.boat+' '+x.phone+' '+x.email+' '+ps).toLowerCase().includes(q); });
   if(sf)a=a.filter(x=>x.status===sf);
 
   b.innerHTML=a.length?'':'<div class="empty">Aucun contact.</div>';
@@ -555,7 +557,7 @@ async function render(){
   a.slice().sort((u,v)=>(Number(v.id)||0)-(Number(u.id)||0)).forEach(x=>{
     let d=document.createElement('div');
     d.className='contact';
-    const ps=x.projects||[]; const names=ps.map(p=>p.name).filter(Boolean).join(' · '); d.innerHTML='<div><b>'+esc(x.name||'Sans nom')+'</b><div class="muted">'+esc(x.company)+' · '+esc(names||x.project||'')+'</div><div class="muted">'+esc(x.phone)+' · '+ps.length+' projet(s)</div></div><span class="badge">'+esc((ps[0]&&ps[0].status)||x.status||'')+'</span>'; 
+    const ps=x.projects||[]; const names=ps.map(p=>p.name).filter(Boolean).join(' · '); const company=(x.company||'').trim(); const boat=(x.boat||'').trim(); const displayName=company || boat || 'Sans société / bateau'; const secondary=company && boat ? boat : ''; d.innerHTML='<div><b>'+esc(displayName)+'</b>'+ (secondary ? '<div class="muted">'+esc(secondary)+'</div>' : '') +'<div class="muted">'+esc(names||x.project||'')+'</div><div class="muted">'+esc(x.phone)+' · '+ps.length+' projet(s)</div></div><span class="badge">'+esc((ps[0]&&ps[0].status)||x.status||'')+'</span>'; 
     d.onclick=()=>showContact(x.id);
     b.appendChild(d);
   });
