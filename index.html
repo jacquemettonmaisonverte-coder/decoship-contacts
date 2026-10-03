@@ -15,12 +15,14 @@ header{background:linear-gradient(135deg,var(--d),var(--b));color:white;padding:
 main{max-width:1000px;margin:auto;padding:14px}.view{display:none}.view.on{display:block}.card{background:#fff;border-radius:18px;padding:16px;margin-bottom:14px;box-shadow:0 3px 18px #12343a12}
 h2{margin:0 0 14px;font-size:19px}.actions{display:grid;grid-template-columns:1fr 1fr;gap:12px}
 button{border:0;border-radius:14px;padding:14px 15px;font-size:16px;font-weight:750;background:var(--d);color:#fff;min-height:50px}button.alt{background:#e7f1f2;color:var(--d)}button.orange{background:var(--o)}
+.danger{background:#d9534f!important;color:#fff!important;}
+
 .row{display:grid;grid-template-columns:1fr 1fr;gap:10px}label{display:block;font-size:12px;font-weight:700;color:#557177;margin:3px 0}
 input,select,textarea{width:100%;padding:13px;border:1px solid #d4e0e2;border-radius:12px;font-size:16px;background:white;margin:4px 0 10px}textarea{resize:vertical}
 .toolbar{display:flex;gap:8px;flex-wrap:wrap}.toolbar button{min-height:42px;padding:9px 12px;font-size:14px}
 canvas{width:100%;height:250px;border:2px dashed #c8d8da;border-radius:14px;background:#fff;touch-action:none}
 .photos{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}.photos img{width:100%;aspect-ratio:1;object-fit:cover;border-radius:12px}
-.contact{padding:13px 0;border-bottom:1px solid #e6eeee;display:flex;justify-content:space-between;gap:10px;cursor:pointer}.contact:last-child{border-bottom:0}.contact:active{background:#f1f8f9;border-radius:12px}.badge{background:#edf6f7;color:var(--d);padding:6px 9px;border-radius:10px;font-size:12px;white-space:nowrap}.muted{color:var(--muted);font-size:13px}.detailRow{padding:9px 0;border-bottom:1px solid #e8eeee}.detailLabel{font-size:11px;font-weight:800;color:#668087;text-transform:uppercase;letter-spacing:.5px}.detailValue{font-size:16px;margin-top:2px;white-space:pre-wrap}.detailPhotos{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:10px}.detailPhotos img{width:100%;aspect-ratio:1;object-fit:cover;border-radius:12px}.drawing{width:100%;border:1px solid #d4e0e2;border-radius:12px;margin-top:8px;background:#fff}
+.contact{padding:13px 0;border-bottom:1px solid #e6eeee;display:flex;justify-content:space-between;gap:10px;cursor:pointer}.contact:last-child{border-bottom:0}.contact:active{background:#f1f8f9;border-radius:12px}.badge{background:#edf6f7;color:var(--d);padding:6px 9px;border-radius:10px;font-size:12px;white-space:nowrap}.muted{color:var(--muted);font-size:13px}.detailRow{padding:9px 0;border-bottom:1px solid #e8eeee}.detailLabel{font-size:11px;font-weight:800;color:#668087;text-transform:uppercase;letter-spacing:.5px}.detailValue{font-size:16px;margin-top:2px;white-space:pre-wrap}.detailPhotos{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:10px}.detailPhotos img{width:100%;aspect-ratio:1;object-fit:cover;border-radius:12px}.drawing{width:100%;border:1px solid #d4e0e2;border-radius:12px;margin-top:8px;background:#fff}.projectCard{border:1px solid #dbe7e9;border-radius:14px;padding:12px;margin-top:10px;background:#fbfdfd}.projectHead{display:flex;justify-content:space-between;align-items:flex-start;gap:10px}.projectActions{display:flex;gap:8px;margin-top:10px;flex-wrap:wrap}.projectActions button{min-height:40px;padding:9px 12px;font-size:14px}
 .search{margin-bottom:10px}.empty{text-align:center;color:var(--muted);padding:25px 10px}.top{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}.editbar{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:14px}
 @media(max-width:650px){.row{grid-template-columns:1fr}.actions{grid-template-columns:1fr 1fr}main{padding:10px}}
 </style>
@@ -254,9 +256,26 @@ async function migrateOldContacts(){
   try{ localStorage.removeItem('decoContacts'); }catch(e){}
 }
 
+function normalizeContact(c){
+  if(!c) return c;
+  if(!Array.isArray(c.projects)){
+    c.projects=[{
+      id:'p-'+String(c.id),
+      name:c.project||'Projet principal',
+      status:c.status||'À commander',
+      follow:c.follow||'',
+      note:c.note||'',
+      drawing:c.drawing||'',
+      noteType:c.noteType||'keyboard',
+      photos:Array.isArray(c.photos)?c.photos.slice():[]
+    }];
+  }
+  return c;
+}
+
 async function getContacts(){
   await migrateOldContacts();
-  return await dbGetAll();
+  return (await dbGetAll()).map(normalizeContact);
 }
 
 async function getContact(id){
@@ -397,7 +416,7 @@ function esc(s){
   }[m]));
 }
 
-let editingId=null,editingPhotos=[];
+let editingId=null,editingProjectId=null,editingProjectIndex=null,editingPhotos=[];
 
 function clearCanvas(){
   ctx.clearRect(0,0,pad.width/scale,pad.height/scale);
@@ -412,6 +431,8 @@ function reset(){
   $('photoHelp').textContent='';
   clearCanvas();
   editingId=null;
+  editingProjectId=null;
+  editingProjectIndex=null;
   editingPhotos=[];
   setNoteMode('keyboard');
   $('formTitle').textContent='Nouveau contact';
@@ -424,45 +445,47 @@ function newContact(){
   view('form');
 }
 
-async function editContact(id){
+async function editContact(id,projectId=null,projectIndex=null){
   let x=await getContact(id);
   if(!x)return;
 
   editingId=id;
-  editingPhotos=Array.isArray(x.photos)?x.photos.slice():[];
+  editingProjectId=projectId;
+  editingProjectIndex=(Number.isInteger(projectIndex) ? projectIndex : null);
+  const isNewProject = projectId === '__new__';
+  const projects=Array.isArray(x.projects)?x.projects:[];
+  const p = isNewProject ? null : (editingProjectIndex!==null ? projects[editingProjectIndex] : (projectId ? projects.find(v=>String(v.id)===String(projectId)) : projects[0]));
+  if(!p && projectId!==null && !isNewProject)return;
+  editingPhotos=p ? (Array.isArray(p.photos)?p.photos.slice():[]) : [];
 
-  $('formTitle').textContent='Modifier le contact';
-  $('save').textContent='💾 Enregistrer les modifications';
+  $('formTitle').textContent=projectId===null ? 'Modifier le contact' : (isNewProject ? 'Nouveau projet' : 'Modifier le projet');
+  $('save').textContent=projectId===null?'💾 Enregistrer les modifications':'💾 Enregistrer le projet';
   $('name').value=x.name||'';
   $('company').value=x.company||'';
   $('phone').value=x.phone||'';
   $('email').value=x.email||'';
-  $('project').value=x.project||'';
-  $('status').value=x.status||'À commander';
-  $('follow').value=x.follow||'';
-  $('note').value=x.note||'';
+  $('project').value=p ? (p.name||'') : '';
+  $('status').value=p ? (p.status||'À commander') : 'À commander';
+  $('follow').value=p ? (p.follow||'') : '';
+  $('note').value=p ? (p.note||'') : '';
   $('photoCamera').value='';
   $('photoLibrary').value='';
   $('photos').innerHTML='';
   renderPhotoList();
   clearCanvas();
-  setNoteMode(x.noteType || (x.drawing?'stylus':'keyboard'));
+  setNoteMode(p ? (p.noteType || (p.drawing?'stylus':'keyboard')) : 'keyboard');
 
-  if(x.drawing){
+  if(p && p.drawing){
     let im=new Image();
     im.onload=()=>{ctx.drawImage(im,0,0,pad.width/scale,pad.height/scale)};
-    im.src=x.drawing;
+    im.src=p.drawing;
   }
   view('form');
 }
-
 $('save').onclick=async()=>{
-  const obj={
-    name:$('name').value,
-    company:$('company').value,
-    phone:$('phone').value,
-    email:$('email').value,
-    project:$('project').value,
+  const project={
+    id:(editingProjectIndex!==null && editingProjectIndex>=0 && editingProjectId!=='__new__') ? (editingProjectId || ('p-'+Date.now())) : ('p-'+Date.now()),
+    name:$('project').value.trim() || 'Projet sans nom',
     status:$('status').value,
     follow:$('follow').value,
     note:$('note').value,
@@ -475,10 +498,28 @@ $('save').onclick=async()=>{
     if(editingId!==null){
       const old=await getContact(editingId);
       if(!old)return;
-      await dbPut({...old,...obj,id:editingId});
-      alert('Contact modifié');
+      const projects=Array.isArray(old.projects)?old.projects.slice():[];
+      if(editingProjectIndex!==null && editingProjectIndex>=0){
+        const idx=editingProjectIndex;
+        if(idx<0) throw new Error('Projet introuvable');
+        projects[idx]=project;
+      }else{
+        projects.push(project);
+      }
+      const first=projects[0]||project;
+      const updated={...old, name:$('name').value, company:$('company').value, phone:$('phone').value, email:$('email').value, projects};
+      // Keep legacy fields synchronized with the first project for compatibility.
+      updated.project=first.name; updated.status=first.status; updated.follow=first.follow; updated.note=first.note; updated.drawing=first.drawing; updated.noteType=first.noteType; updated.photos=first.photos;
+      await dbPut(updated);
+      alert(editingProjectIndex!==null && editingProjectIndex>=0?'Projet modifié':'Projet ajouté au client');
     }else{
-      obj.id=Date.now();
+      const obj={
+        id:Date.now(),
+        name:$('name').value, company:$('company').value, phone:$('phone').value, email:$('email').value,
+        projects:[project],
+        // Legacy fields kept for compatibility with older versions.
+        project:project.name,status:project.status,follow:project.follow,note:project.note,drawing:project.drawing,noteType:project.noteType,photos:project.photos
+      };
       await dbPut(obj);
       alert('Contact enregistré');
     }
@@ -506,7 +547,7 @@ async function render(){
   let sf=$('statusFilter').value;
   let b=$('listbox');
 
-  a=a.filter(x=>(x.name+' '+x.company+' '+x.project+' '+x.phone).toLowerCase().includes(q));
+  a=a.filter(x=>{ const ps=(x.projects||[]).map(p=>p.name+' '+p.status+' '+p.note).join(' '); return (x.name+' '+x.company+' '+x.phone+' '+ps).toLowerCase().includes(q); });
   if(sf)a=a.filter(x=>x.status===sf);
 
   b.innerHTML=a.length?'':'<div class="empty">Aucun contact.</div>';
@@ -514,7 +555,7 @@ async function render(){
   a.slice().sort((u,v)=>(Number(v.id)||0)-(Number(u.id)||0)).forEach(x=>{
     let d=document.createElement('div');
     d.className='contact';
-    d.innerHTML='<div><b>'+esc(x.name||'Sans nom')+'</b><div class="muted">'+esc(x.company)+' · '+esc(x.project)+'</div><div class="muted">'+esc(x.phone)+'</div></div><span class="badge">'+esc(x.status)+'</span>';
+    const ps=x.projects||[]; const names=ps.map(p=>p.name).filter(Boolean).join(' · '); d.innerHTML='<div><b>'+esc(x.name||'Sans nom')+'</b><div class="muted">'+esc(x.company)+' · '+esc(names||x.project||'')+'</div><div class="muted">'+esc(x.phone)+' · '+ps.length+' projet(s)</div></div><span class="badge">'+esc((ps[0]&&ps[0].status)||x.status||'')+'</span>'; 
     d.onclick=()=>showContact(x.id);
     b.appendChild(d);
   });
@@ -530,29 +571,51 @@ async function showContact(id){
     ? '<div class="detailRow"><div class="detailLabel">'+label+'</div><div class="detailValue">'+esc(val)+'</div></div>'
     : '';
 
-  h+=row('Société',x.company)
-    +row('Téléphone',x.phone)
-    +row('E-mail',x.email)
-    +row('Bateau / Projet',x.project)
-    +row('Statut',x.status)
-    +row('Rappel',x.follow)
-    +row('Note au clavier',x.note);
+  h+=row('Société',x.company)+row('Téléphone',x.phone)+row('E-mail',x.email);
+  h+='<div class="detailRow"><div class="detailLabel">Projets</div><div class="projectActions"><button onclick="newProject('+x.id+')">➕ Nouveau projet</button></div>'
+    +'<div class="muted" style="margin-top:8px">Ce client peut maintenant avoir plusieurs projets indépendants, avec leurs photos, notes, statut et rappel.</div></div>';
 
-  if(x.photos&&x.photos.length){
-    h+='<div class="detailRow"><div class="detailLabel">Photos du projet</div><div class="detailPhotos">'
-      +x.photos.map(src=>'<img src="'+src+'">').join('')
-      +'</div></div>';
-  }
+  (x.projects||[]).forEach((p,projectIndex)=>{
+    h+='<div class="projectCard">'+
+      '<div class="projectHead"><div><b>⛵ '+esc(p.name||'Projet sans nom')+'</b><div class="muted">'+esc(p.status||'')+(p.follow?' · Rappel : '+esc(p.follow):'')+'</div></div><span class="badge">'+esc(p.status||'')+'</span></div>'+
+      (p.note?'<div class="detailValue" style="margin-top:9px">'+esc(p.note)+'</div>':'')+
+      (p.photos&&p.photos.length?'<div class="detailPhotos">'+p.photos.map(src=>'<img src="'+src+'">').join('')+'</div>':'')+
+      (p.drawing?'<img class="drawing" src="'+p.drawing+'">':'')+
+      '<div class="projectActions"><button class="orange" onclick="editContact('+x.id+',\''+p.id+'\','+projectIndex+')">✏️ Modifier</button><button class="danger" onclick="deleteProject('+x.id+','+projectIndex+')">🗑️ Supprimer</button></div>'+
+      '</div>';
+  });
 
-  if(x.drawing){
-    h+='<div class="detailRow"><div class="detailLabel">Note manuscrite au stylet</div><img class="drawing" src="'+x.drawing+'"></div>';
-  }
-
-  h+='<div class="editbar"><button class="orange" onclick="editContact('+x.id+')">✏️ Modifier</button><button class="alt" onclick="view(\'list\')">← Contacts</button></div>';
-  $('detailBox').innerHTML=h||'<div class="empty">Aucune information.</div>';
+  h+='<div class="editbar"><button class="alt" onclick="editContact('+x.id+')">✏️ Modifier le client</button><button class="alt" onclick="view(\'list\')">← Contacts</button></div>';
+  $('detailBox').innerHTML=h;
   view('detail');
 }
 
+function newProject(id){
+  editContact(id,'__new__');
+}
+
+async function deleteProject(contactId, projectIndex){
+  const x=await getContact(contactId);
+  if(!x) return;
+  const projects=Array.isArray(x.projects)?x.projects.slice():[];
+  if(!Number.isInteger(projectIndex) || projectIndex<0 || projectIndex>=projects.length) return;
+  const project=projects[projectIndex];
+  const name=project.name||'ce projet';
+  if(!confirm('Supprimer définitivement « '+name+' » ?\n\nLes photos, notes et informations de ce projet seront supprimées.')) return;
+  projects.splice(projectIndex,1);
+  const first=projects[0]||null;
+  const updated={...x,projects};
+  // Keep legacy fields synchronized with the first remaining project.
+  updated.project=first ? first.name : '';
+  updated.status=first ? first.status : '';
+  updated.follow=first ? first.follow : '';
+  updated.note=first ? first.note : '';
+  updated.drawing=first ? first.drawing : '';
+  updated.noteType=first ? first.noteType : 'text';
+  updated.photos=first ? first.photos : [];
+  await dbPut(updated);
+  await showContact(contactId);
+}
 $('search').oninput=render;
 $('statusFilter').onchange=render;
 
