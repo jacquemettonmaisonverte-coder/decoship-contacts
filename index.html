@@ -27,12 +27,13 @@ canvas{width:100%;height:250px;border:2px dashed #c8d8da;border-radius:14px;back
 @media(max-width:650px){.row{grid-template-columns:1fr}.actions{grid-template-columns:1fr 1fr}main{padding:10px}}
 </style>
 <style>
-.financialBox{margin-top:10px;padding:10px;border:1px solid #dbe7e9;border-radius:12px;background:#f8fbfb}
-.financialGrid{display:grid;grid-template-columns:repeat(2,1fr);gap:7px;margin-top:7px}
-.financialItem{font-size:12px;color:#60777c}
-.financialItem strong{display:block;font-size:14px;color:#17343a;margin-top:2px}
-.financialRemaining{margin-top:8px;font-weight:900;font-size:14px}
-.fin-paid{color:#2e7d32}.fin-deposit{color:#00838f}.fin-pending{color:#e65100}.fin-to-invoice{color:#e53935}
+.financialBox{margin-top:10px;padding:12px;border:1px solid #dbe7e9;border-radius:12px;background:#f8fbfb}
+.financialTitle{font-weight:900;color:#17444d;margin-bottom:8px}
+.financialGrid{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}
+.financialItem{padding:7px 8px;border-radius:9px;background:#fff;font-size:12px;color:#60777c}
+.financialItem strong{display:block;font-size:15px;color:#17343a;margin-top:2px}
+.financialRemaining{margin-top:9px;font-weight:900;font-size:14px}
+.finPaid{color:#2e7d32}.finDeposit{color:#00838f}.finPending{color:#e65100}.finInvoice{color:#e53935}
 </style></head>
 <body>
 <header>
@@ -73,7 +74,7 @@ canvas{width:100%;height:250px;border:2px dashed #c8d8da;border-radius:14px;back
 <div class="row"><div><label>Statut</label><select id="status">
 <option>Demande</option><option>Devis</option><option>En attente</option><option>Accepté</option><option value="Acompte">Acompte</option><option>À produire</option><option>À poser</option><option>À facturer</option>
 </select></div><div><label>Rappel</label><input id="follow" type="date"></div></div>
-<div class="row"><div><label>Montant du devis (€)</label><input id="quoteAmount" type="number" min="0" step="0.01" inputmode="decimal" placeholder="0,00"></div><div><label>Montant de la facture (€)</label><input id="invoiceAmount" type="number" min="0" step="0.01" inputmode="decimal" placeholder="0,00"></div></div>
+<div class="row"><div><label>Montant du devis (€)</label><input id="quoteAmount" type="number" min="0" step="0.01" inputmode="decimal" placeholder="0,00"></div><div><label>Montant de l’acompte (€)</label><input id="depositAmount" type="number" min="0" step="0.01" inputmode="decimal" placeholder="0,00"></div></div><div class="row"><div><label>Montant de la facture (€)</label><input id="invoiceAmount" type="number" min="0" step="0.01" inputmode="decimal" placeholder="0,00"></div><div></div></div>
 <div class="card">
 <h2>📝 Note</h2>
 <div class="toolbar" style="margin-bottom:10px">
@@ -305,21 +306,10 @@ function normalizeContact(c){
       photos:Array.isArray(c.photos)?c.photos.slice():[]
     }];
   } else {
-    c.projects=c.projects.map(p=>({...p,status:normalizeStatus(p.status),quoteAmount:p.quoteAmount??'',invoiceAmount:p.invoiceAmount??''}));
+    c.projects=c.projects.map(p=>({...p,status:normalizeStatus(p.status),quoteAmount:p.quoteAmount??'',depositAmount:p.depositAmount??'',invoiceAmount:p.invoiceAmount??''}));
   }
   return c;
 }
-function financialState(p){
-  const invoice=Number(p.invoiceAmount)||0;
-  const deposit=Number(p.depositAmount)||0;
-  const remaining=Math.max(0,invoice-deposit);
-  let label='À facturer', cls='fin-to-invoice';
-  if(invoice>0 && remaining<=0){label='Réglé';cls='fin-paid';}
-  else if(deposit>0 && invoice>0){label='Acompte reçu';cls='fin-deposit';}
-  else if(invoice>0){label='Facturé – en attente de règlement';cls='fin-pending';}
-  return {invoice,deposit,remaining,label,cls};
-}
-
 function money(v){
   const n=Number(v);
   if(!Number.isFinite(n)||n===0) return '';
@@ -480,7 +470,7 @@ function clearCanvas(){
 }
 
 function reset(){
-  ['name','company','boat','phone','email','project','follow','note'].forEach(i=>$(i).value='');
+  ['name','company','boat','phone','email','project','follow','note','depositAmount'].forEach(i=>$(i).value='');
   $('status').value='Demande';
   $('photoCamera').value='';
   $('photoLibrary').value='';
@@ -526,6 +516,7 @@ async function editContact(id,projectId=null,projectIndex=null){
   $('status').value=p ? normalizeStatus(p.status) : 'Demande';
   $('follow').value=p ? (p.follow||'') : '';
   $('quoteAmount').value=p && p.quoteAmount!=='' && p.quoteAmount!=null ? p.quoteAmount : '';
+  $('depositAmount').value=p && p.depositAmount!=='' && p.depositAmount!=null ? p.depositAmount : '';
   $('invoiceAmount').value=p && p.invoiceAmount!=='' && p.invoiceAmount!=null ? p.invoiceAmount : '';
   $('note').value=p ? (p.note||'') : '';
   $('photoCamera').value='';
@@ -549,6 +540,7 @@ $('save').onclick=async()=>{
     status:$('status').value,
     follow:$('follow').value,
     quoteAmount:$('quoteAmount').value===''?'':Number($('quoteAmount').value),
+    depositAmount:$('depositAmount').value===''?'':Number($('depositAmount').value),
     invoiceAmount:$('invoiceAmount').value===''?'':Number($('invoiceAmount').value),
     note:$('note').value,
     drawing:noteMode==='stylus'?pad.toDataURL():'',
@@ -571,7 +563,7 @@ $('save').onclick=async()=>{
       const first=projects[0]||project;
       const updated={...old, name:$('name').value, company:$('company').value, boat:$('boat').value, phone:$('phone').value, email:$('email').value, projects};
       // Keep legacy fields synchronized with the first project for compatibility.
-      updated.project=first.name; updated.status=first.status; updated.follow=first.follow; updated.quoteAmount=first.quoteAmount; updated.invoiceAmount=first.invoiceAmount; updated.note=first.note; updated.drawing=first.drawing; updated.noteType=first.noteType; updated.photos=first.photos;
+      updated.project=first.name; updated.status=first.status; updated.follow=first.follow; updated.quoteAmount=first.quoteAmount; updated.depositAmount=first.depositAmount; updated.invoiceAmount=first.invoiceAmount; updated.note=first.note; updated.drawing=first.drawing; updated.noteType=first.noteType; updated.photos=first.photos;
       await dbPut(updated);
       alert(editingProjectIndex!==null && editingProjectIndex>=0?'Projet modifié':'Projet ajouté au client');
     }else{
@@ -580,7 +572,7 @@ $('save').onclick=async()=>{
         name:$('name').value, company:$('company').value, boat:$('boat').value, phone:$('phone').value, email:$('email').value,
         projects:[project],
         // Legacy fields kept for compatibility with older versions.
-        project:project.name,status:project.status,follow:project.follow,quoteAmount:project.quoteAmount,invoiceAmount:project.invoiceAmount,note:project.note,drawing:project.drawing,noteType:project.noteType,photos:project.photos
+        project:project.name,status:project.status,follow:project.follow,quoteAmount:project.quoteAmount,depositAmount:project.depositAmount,invoiceAmount:project.invoiceAmount,note:project.note,drawing:project.drawing,noteType:project.noteType,photos:project.photos
       };
       await dbPut(obj);
       alert('Contact enregistré');
@@ -626,6 +618,23 @@ async function render(){
   });
 }
 
+function financialSummary(p){
+  const quote=Number(p.quoteAmount)||0;
+  const deposit=Number(p.depositAmount)||0;
+  const invoice=Number(p.invoiceAmount)||0;
+  const remaining=Math.max(0,invoice-deposit);
+  let label='À facturer', cls='finInvoice';
+  if(invoice>0 && remaining===0){label='Réglé';cls='finPaid';}
+  else if(deposit>0 && invoice>0){label='Acompte reçu';cls='finDeposit';}
+  else if(invoice>0){label='Facturé – en attente de règlement';cls='finPending';}
+  return '<div class="financialBox"><div class="financialTitle">💶 Suivi financier</div><div class="financialGrid">'
+    +'<div class="financialItem">Devis<strong>'+esc(quote?money(quote):'—')+'</strong></div>'
+    +'<div class="financialItem">Acompte<strong>'+esc(deposit?money(deposit):'—')+'</strong></div>'
+    +'<div class="financialItem">Facture<strong>'+esc(invoice?money(invoice):'—')+'</strong></div>'
+    +'<div class="financialItem">Reste à encaisser<strong>'+esc(remaining?money(remaining):'0 €')+'</strong></div>'
+    +'</div><div class="financialRemaining '+cls+'">'+label+'</div></div>';
+}
+
 async function showContact(id){
   let x=await getContact(id);
   if(!x)return;
@@ -643,8 +652,8 @@ async function showContact(id){
   (x.projects||[]).forEach((p,projectIndex)=>{
     h+='<div class="projectCard">'+
       '<div class="projectHead"><div><b>⛵ '+esc(p.name||'Projet sans nom')+'</b><div class="muted">'+esc(normalizeStatus(p.status))+(p.follow?' · Rappel : '+esc(p.follow):'')+'</div></div><span class="projectStatus '+statusClass(normalizeStatus(p.status))+'">'+esc(normalizeStatus(p.status))+'</span></div>'+
-      ((p.quoteAmount!==''&&p.quoteAmount!=null)||(p.invoiceAmount!==''&&p.invoiceAmount!=null)?'<div class="amounts">'+(p.quoteAmount!==''&&p.quoteAmount!=null?'<span class="amount">Devis <strong>'+esc(money(p.quoteAmount))+'</strong></span>':'')+(p.invoiceAmount!==''&&p.invoiceAmount!=null?'<span class="amount">Facture <strong>'+esc(money(p.invoiceAmount))+'</strong></span>':'')+'</div>':'')+
-      (()=>{const f=financialState(p);return '<div class="financialBox"><b>💶 Suivi financier</b><div class="financialGrid"><div class="financialItem">Devis<strong>'+esc(p.quoteAmount!==''&&p.quoteAmount!=null?money(p.quoteAmount):'—')+'</strong></div><div class="financialItem">Acompte<strong>'+esc(p.depositAmount!==''&&p.depositAmount!=null?money(p.depositAmount):'—')+'</strong></div><div class="financialItem">Facture<strong>'+esc(p.invoiceAmount!==''&&p.invoiceAmount!=null?money(p.invoiceAmount):'—')+'</strong></div><div class="financialItem">Reste à encaisser<strong>'+esc(f.remaining>0?money(f.remaining):'0 €')+'</strong></div></div><div class="financialRemaining '+f.cls+'">'+f.label+'</div></div>'})()+(p.note?'<div class="detailValue" style="margin-top:9px">'+esc(p.note)+'</div>':'')+
+      financialSummary(p)+
+      (p.note?'<div class="detailValue" style="margin-top:9px">'+esc(p.note)+'</div>':'')+
       (p.photos&&p.photos.length?'<div class="detailPhotos">'+p.photos.map(src=>'<img src="'+src+'">').join('')+'</div>':'')+
       (p.drawing?'<img class="drawing" src="'+p.drawing+'">':'')+
       '<div class="projectActions"><button class="orange" onclick="editContact('+x.id+',\''+p.id+'\','+projectIndex+')">✏️ Modifier</button><button class="danger" onclick="deleteProject('+x.id+','+projectIndex+')">🗑️ Supprimer</button></div>'+
