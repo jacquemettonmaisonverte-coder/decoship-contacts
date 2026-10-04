@@ -26,6 +26,9 @@ canvas{width:100%;height:250px;border:2px dashed #c8d8da;border-radius:14px;back
 .search{margin-bottom:10px}.quickFilters{display:flex;gap:7px;overflow-x:auto;padding:2px 0 9px;margin-bottom:2px;-webkit-overflow-scrolling:touch}.quickFilter{flex:0 0 auto;min-height:38px;padding:8px 11px;border-radius:999px;background:#edf4f5;color:#42656b;font-size:12px;font-weight:850;box-shadow:none}.quickFilter.active{color:#fff}.quickFilter[data-filter=""]{background:#0C6B74}.quickFilter[data-filter="Demande"].active{background:#2196f3}.quickFilter[data-filter="Devis"].active{background:#ff9800}.quickFilter[data-filter="En attente"].active{background:#9c27b0}.quickFilter[data-filter="Accepté"].active{background:#2e7d32}.quickFilter[data-filter="Acompte"].active{background:#00838f}.quickFilter[data-filter="À produire"].active{background:#1565c0}.quickFilter[data-filter="À poser"].active{background:#00897b}.quickFilter[data-filter="À facturer"].active{background:#e53935}.empty{text-align:center;color:var(--muted);padding:25px 10px}.top{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}.editbar{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:14px}
 @media(max-width:650px){.row{grid-template-columns:1fr}.actions{grid-template-columns:1fr 1fr}main{padding:10px}}
 .financeBox{margin-top:10px;padding:12px;border:1px solid #ddd;border-radius:10px;background:#fafafa}.financeBox h3{margin:0 0 10px;font-size:16px}.financeLine{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-top:9px}.financeLine strong{min-width:75px}.financeLine label{display:inline-flex;align-items:center;gap:4px}#balanceFormAmount{font-weight:700}.financeSummary{display:flex;flex-direction:column;gap:4px;margin-top:8px;padding:8px;border-radius:8px;background:#f5f5f5}
+
+.financeLine input[type="checkbox"]{width:20px;height:20px;accent-color:#00897b}
+.financeLine label{font-size:15px;font-weight:500}
 </style>
 </head>
 <body>
@@ -70,8 +73,8 @@ canvas{width:100%;height:250px;border:2px dashed #c8d8da;border-radius:14px;back
 <div class="financeBox">
 <h3>💶 Suivi financier</h3>
 <div class="row"><div><label>Montant du devis (€)</label><input id="quoteAmount" type="number" min="0" step="0.01" inputmode="decimal" placeholder="0,00"></div><div><label>Montant de l’acompte (€)</label><input id="depositAmount" type="number" min="0" step="0.01" inputmode="decimal" placeholder="0,00"></div></div>
-<div class="financeLine"><strong>Acompte</strong><label><input type="radio" name="depositStatus" id="depositPending" value="pending"> En attente</label><label><input type="radio" name="depositStatus" id="depositPaid" value="paid"> Réglé</label></div>
-<div id="balanceFormBox" class="financeLine" style="display:none"><strong>Solde</strong><span id="balanceFormAmount">0,00 €</span><label><input type="radio" name="balanceStatus" id="balancePending" value="pending"> En attente</label><label><input type="radio" name="balanceStatus" id="balancePaid" value="paid"> Réglé</label></div>
+<div class="financeLine"><strong>Acompte</strong><label><input type="checkbox" id="depositPending" value="pending"> En attente</label><label><input type="checkbox" id="depositPaid" value="paid"> Réglé</label></div>
+<div id="balanceFormBox" class="financeLine" style="display:none"><strong>Solde</strong><span id="balanceFormAmount">0,00 €</span><label><input type="checkbox" id="balancePending" value="pending"> En attente</label><label><input type="checkbox" id="balancePaid" value="paid"> Réglé</label></div>
 <div class="row"><div><label>Total facture (€)</label><input id="invoiceAmount" type="number" min="0" step="0.01" inputmode="decimal" placeholder="0,00"></div></div>
 </div>
 <div class="card">
@@ -627,6 +630,20 @@ async function render(){
   });
 }
 
+
+function setFinanceChecks(){
+  const dp=$("depositPending"), dpa=$("depositPaid");
+  const bp=$("balancePending"), bpa=$("balancePaid");
+  if(dp&&dpa){
+    dp.onchange=()=>{ if(dp.checked)dpa.checked=false; updateFinanceForm(); };
+    dpa.onchange=()=>{ if(dpa.checked)dp.checked=false; updateFinanceForm(); };
+  }
+  if(bp&&bpa){
+    bp.onchange=()=>{ if(bp.checked)bpa.checked=false; updateFinanceForm(); };
+    bpa.onchange=()=>{ if(bpa.checked)bp.checked=false; updateFinanceForm(); };
+  }
+}
+
 function updateFinanceForm(){
   const q=Number($('quoteAmount')?.value||0);
   const d=Number($('depositAmount')?.value||0);
@@ -638,6 +655,8 @@ function updateFinanceForm(){
   if(!paid && $('balancePending')) $('balancePending').checked=true;
 }
 ['quoteAmount','depositAmount','depositPending','depositPaid','balancePending','balancePaid'].forEach(id=>{const el=$(id);if(el){el.addEventListener('change',updateFinanceForm);if(el.type==='number')el.addEventListener('input',updateFinanceForm);}});
+
+setFinanceChecks();
 
 async function showContact(id){
   let x=await getContact(id);
