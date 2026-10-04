@@ -719,6 +719,7 @@ $('restoreFile').onchange=async(e)=>{
           const item={
             name:p.name||'Projet sans nom',
             company:company,
+            client:(company || (c.name||'').trim()),
             boat:boat,
             status:normalizeStatus(p.status),
             contactId:c.id,
@@ -746,8 +747,8 @@ $('restoreFile').onchange=async(e)=>{
           html+='<div onclick="showContact('+Number(item.contactId)+')" style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px;margin-top:7px;padding:10px;border-radius:10px;background:#fff;border:1px solid #f0cccc;cursor:pointer">';
           html+='<div style="min-width:0">';
           html+='<div style="font-weight:800;color:#17343a">'+escLocal(item.name)+'</div>';
-          if(item.company) html+='<div style="font-size:12px;font-weight:700;color:#45666d;margin-top:2px">Client : '+escLocal(item.company)+'</div>';
-          if(item.boat) html+='<div style="font-size:11px;color:#668087;margin-top:2px">⛵ '+escLocal(item.boat)+'</div>';
+          html+='<div style="font-size:12px;font-weight:700;color:#45666d;margin-top:2px">Client : '+escLocal(item.client||'Non renseigné')+'</div>';
+          html+='<div style="font-size:11px;color:#668087;margin-top:2px">⛵ Bateau : '+escLocal(item.boat||'Non renseigné')+'</div>';
           html+='<div style="font-size:11px;color:#a04b4b;margin-top:4px">Rappel : '+dateLabel+'</div>';
           html+='</div>';
           html+='<span style="background:'+bg+';color:#fff;padding:5px 8px;border-radius:999px;font-size:11px;font-weight:800;white-space:nowrap">'+escLocal(item.status)+'</span>';
