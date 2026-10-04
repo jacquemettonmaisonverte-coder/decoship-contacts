@@ -23,7 +23,7 @@ input,select,textarea{width:100%;padding:13px;border:1px solid #d4e0e2;border-ra
 canvas{width:100%;height:250px;border:2px dashed #c8d8da;border-radius:14px;background:#fff;touch-action:none}
 .photos{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}.photos img{width:100%;aspect-ratio:1;object-fit:cover;border-radius:12px}
 .contact{padding:13px 0;border-bottom:1px solid #e6eeee;display:flex;justify-content:space-between;gap:10px;cursor:pointer}.contact:last-child{border-bottom:0}.contact:active{background:#f1f8f9;border-radius:12px}.badge{background:#edf6f7;color:var(--d);padding:6px 9px;border-radius:10px;font-size:12px;white-space:nowrap}.muted{color:var(--muted);font-size:13px}.detailRow{padding:9px 0;border-bottom:1px solid #e8eeee}.detailLabel{font-size:11px;font-weight:800;color:#668087;text-transform:uppercase;letter-spacing:.5px}.detailValue{font-size:16px;margin-top:2px;white-space:pre-wrap}.detailPhotos{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:10px}.detailPhotos img{width:100%;aspect-ratio:1;object-fit:cover;border-radius:12px}.drawing{width:100%;border:1px solid #d4e0e2;border-radius:12px;margin-top:8px;background:#fff}.projectCard{border:1px solid #dbe7e9;border-radius:14px;padding:12px;margin-top:10px;background:#fbfdfd}.projectHead{display:flex;justify-content:space-between;align-items:flex-start;gap:10px}.projectStatus{display:inline-flex;align-items:center;gap:6px;padding:6px 9px;border-radius:999px;font-size:12px;font-weight:800;white-space:nowrap}.status-demande{background:#2196f3;color:#fff;box-shadow:0 2px 5px rgba(33,150,243,.28)}.status-devis{background:#ff9800;color:#fff;box-shadow:0 2px 5px rgba(255,152,0,.28)}.status-attente{background:#9c27b0;color:#fff;box-shadow:0 2px 5px rgba(156,39,176,.28)}.status-accepte{background:#2e7d32;color:#fff;box-shadow:0 2px 5px rgba(46,125,50,.28)}.status-produire{background:#1565c0;color:#fff;box-shadow:0 2px 5px rgba(21,101,192,.28)}.status-poser{background:#00897b;color:#fff;box-shadow:0 2px 5px rgba(0,137,123,.28)}.status-acompte{background:#00838f;color:#fff;box-shadow:0 2px 5px rgba(0,131,143,.28)}.status-facturer{background:#e53935;color:#fff;box-shadow:0 2px 5px rgba(229,57,53,.28)}.projectMini{border:1px solid #e2ebed;border-radius:12px;padding:10px;margin-top:8px;background:#fff}.projectMiniTop{display:flex;justify-content:space-between;gap:8px;align-items:center}.projectMiniName{font-weight:800}.amounts{display:flex;gap:14px;flex-wrap:wrap;margin-top:7px}.amount{font-size:12px;color:#5e7479}.amount strong{color:#17343a}.projectActions{display:flex;gap:8px;margin-top:10px;flex-wrap:wrap}.projectActions button{min-height:40px;padding:9px 12px;font-size:14px}
-.search{margin-bottom:10px}.empty{text-align:center;color:var(--muted);padding:25px 10px}.top{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}.editbar{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:14px}
+.search{margin-bottom:10px}.quickFilters{display:flex;gap:7px;overflow-x:auto;padding:2px 0 9px;margin-bottom:2px;-webkit-overflow-scrolling:touch}.quickFilter{flex:0 0 auto;min-height:38px;padding:8px 11px;border-radius:999px;background:#edf4f5;color:#42656b;font-size:12px;font-weight:850;box-shadow:none}.quickFilter.active{color:#fff}.quickFilter[data-filter=""]{background:#0C6B74}.quickFilter[data-filter="Demande"].active{background:#2196f3}.quickFilter[data-filter="Devis"].active{background:#ff9800}.quickFilter[data-filter="En attente"].active{background:#9c27b0}.quickFilter[data-filter="Accepté"].active{background:#2e7d32}.quickFilter[data-filter="Acompte"].active{background:#00838f}.quickFilter[data-filter="À produire"].active{background:#1565c0}.quickFilter[data-filter="À poser"].active{background:#00897b}.quickFilter[data-filter="À facturer"].active{background:#e53935}.empty{text-align:center;color:var(--muted);padding:25px 10px}.top{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}.editbar{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:14px}
 @media(max-width:650px){.row{grid-template-columns:1fr}.actions{grid-template-columns:1fr 1fr}main{padding:10px}}
 </style>
 </head>
@@ -93,6 +93,17 @@ canvas{width:100%;height:250px;border:2px dashed #c8d8da;border-radius:14px;back
 <div class="top"><h2>Mes contacts</h2><button class="alt" id="back2">← Retour</button></div>
 <div class="card">
 <input class="search" id="search" placeholder="🔎 Rechercher un nom, société, bateau…">
+<div class="quickFilters" id="quickFilters" aria-label="Filtres rapides">
+<button type="button" class="quickFilter active" data-filter="">TOUS</button>
+<button type="button" class="quickFilter" data-filter="Demande">DEMANDE</button>
+<button type="button" class="quickFilter" data-filter="Devis">DEVIS</button>
+<button type="button" class="quickFilter" data-filter="En attente">EN ATTENTE</button>
+<button type="button" class="quickFilter" data-filter="Acompte">ACOMPTE</button>
+<button type="button" class="quickFilter" data-filter="Accepté">ACCEPTÉ</button>
+<button type="button" class="quickFilter" data-filter="À produire">À PRODUIRE</button>
+<button type="button" class="quickFilter" data-filter="À poser">À POSER</button>
+<button type="button" class="quickFilter" data-filter="À facturer">À FACTURER</button>
+</div>
 <select id="statusFilter" style="margin-bottom:10px">
 <option value="">Tous les statuts</option><option>Demande</option><option>Devis</option><option>En attente</option><option>Accepté</option><option>Acompte</option><option>À produire</option><option>À poser</option><option>À facturer</option>
 </select>
@@ -650,7 +661,17 @@ async function deleteProject(contactId, projectIndex){
   await showContact(contactId);
 }
 $('search').oninput=render;
-$('statusFilter').onchange=render;
+$('statusFilter').onchange=()=>{
+  document.querySelectorAll('.quickFilter').forEach(btn=>btn.classList.toggle('active',btn.dataset.filter===$('statusFilter').value));
+  render();
+};
+document.querySelectorAll('.quickFilter').forEach(btn=>{
+  btn.onclick=()=>{
+    $('statusFilter').value=btn.dataset.filter;
+    document.querySelectorAll('.quickFilter').forEach(b=>b.classList.toggle('active',b===btn));
+    render();
+  };
+});
 
 $('backupBtn').onclick=async()=>{
   try{ await backupContacts(); }
