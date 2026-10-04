@@ -26,7 +26,14 @@ canvas{width:100%;height:250px;border:2px dashed #c8d8da;border-radius:14px;back
 .search{margin-bottom:10px}.quickFilters{display:flex;gap:7px;overflow-x:auto;padding:2px 0 9px;margin-bottom:2px;-webkit-overflow-scrolling:touch}.quickFilter{flex:0 0 auto;min-height:38px;padding:8px 11px;border-radius:999px;background:#edf4f5;color:#42656b;font-size:12px;font-weight:850;box-shadow:none}.quickFilter.active{color:#fff}.quickFilter[data-filter=""]{background:#0C6B74}.quickFilter[data-filter="Demande"].active{background:#2196f3}.quickFilter[data-filter="Devis"].active{background:#ff9800}.quickFilter[data-filter="En attente"].active{background:#9c27b0}.quickFilter[data-filter="Accepté"].active{background:#2e7d32}.quickFilter[data-filter="Acompte"].active{background:#00838f}.quickFilter[data-filter="À produire"].active{background:#1565c0}.quickFilter[data-filter="À poser"].active{background:#00897b}.quickFilter[data-filter="À facturer"].active{background:#e53935}.empty{text-align:center;color:var(--muted);padding:25px 10px}.top{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}.editbar{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:14px}
 @media(max-width:650px){.row{grid-template-columns:1fr}.actions{grid-template-columns:1fr 1fr}main{padding:10px}}
 </style>
-</head>
+<style>
+.financialBox{margin-top:10px;padding:10px;border:1px solid #dbe7e9;border-radius:12px;background:#f8fbfb}
+.financialGrid{display:grid;grid-template-columns:repeat(2,1fr);gap:7px;margin-top:7px}
+.financialItem{font-size:12px;color:#60777c}
+.financialItem strong{display:block;font-size:14px;color:#17343a;margin-top:2px}
+.financialRemaining{margin-top:8px;font-weight:900;font-size:14px}
+.fin-paid{color:#2e7d32}.fin-deposit{color:#00838f}.fin-pending{color:#e65100}.fin-to-invoice{color:#e53935}
+</style></head>
 <body>
 <header>
 <div style="display:flex;align-items:center;gap:12px">
@@ -302,6 +309,17 @@ function normalizeContact(c){
   }
   return c;
 }
+function financialState(p){
+  const invoice=Number(p.invoiceAmount)||0;
+  const deposit=Number(p.depositAmount)||0;
+  const remaining=Math.max(0,invoice-deposit);
+  let label='À facturer', cls='fin-to-invoice';
+  if(invoice>0 && remaining<=0){label='Réglé';cls='fin-paid';}
+  else if(deposit>0 && invoice>0){label='Acompte reçu';cls='fin-deposit';}
+  else if(invoice>0){label='Facturé – en attente de règlement';cls='fin-pending';}
+  return {invoice,deposit,remaining,label,cls};
+}
+
 function money(v){
   const n=Number(v);
   if(!Number.isFinite(n)||n===0) return '';
@@ -626,7 +644,7 @@ async function showContact(id){
     h+='<div class="projectCard">'+
       '<div class="projectHead"><div><b>⛵ '+esc(p.name||'Projet sans nom')+'</b><div class="muted">'+esc(normalizeStatus(p.status))+(p.follow?' · Rappel : '+esc(p.follow):'')+'</div></div><span class="projectStatus '+statusClass(normalizeStatus(p.status))+'">'+esc(normalizeStatus(p.status))+'</span></div>'+
       ((p.quoteAmount!==''&&p.quoteAmount!=null)||(p.invoiceAmount!==''&&p.invoiceAmount!=null)?'<div class="amounts">'+(p.quoteAmount!==''&&p.quoteAmount!=null?'<span class="amount">Devis <strong>'+esc(money(p.quoteAmount))+'</strong></span>':'')+(p.invoiceAmount!==''&&p.invoiceAmount!=null?'<span class="amount">Facture <strong>'+esc(money(p.invoiceAmount))+'</strong></span>':'')+'</div>':'')+
-      (p.note?'<div class="detailValue" style="margin-top:9px">'+esc(p.note)+'</div>':'')+
+      (()=>{const f=financialState(p);return '<div class="financialBox"><b>💶 Suivi financier</b><div class="financialGrid"><div class="financialItem">Devis<strong>'+esc(p.quoteAmount!==''&&p.quoteAmount!=null?money(p.quoteAmount):'—')+'</strong></div><div class="financialItem">Acompte<strong>'+esc(p.depositAmount!==''&&p.depositAmount!=null?money(p.depositAmount):'—')+'</strong></div><div class="financialItem">Facture<strong>'+esc(p.invoiceAmount!==''&&p.invoiceAmount!=null?money(p.invoiceAmount):'—')+'</strong></div><div class="financialItem">Reste à encaisser<strong>'+esc(f.remaining>0?money(f.remaining):'0 €')+'</strong></div></div><div class="financialRemaining '+f.cls+'">'+f.label+'</div></div>'})()+(p.note?'<div class="detailValue" style="margin-top:9px">'+esc(p.note)+'</div>':'')+
       (p.photos&&p.photos.length?'<div class="detailPhotos">'+p.photos.map(src=>'<img src="'+src+'">').join('')+'</div>':'')+
       (p.drawing?'<img class="drawing" src="'+p.drawing+'">':'')+
       '<div class="projectActions"><button class="orange" onclick="editContact('+x.id+',\''+p.id+'\','+projectIndex+')">✏️ Modifier</button><button class="danger" onclick="deleteProject('+x.id+','+projectIndex+')">🗑️ Supprimer</button></div>'+
