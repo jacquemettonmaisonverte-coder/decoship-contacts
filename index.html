@@ -603,45 +603,7 @@ async function render(){
   });
 }
 
-async 
-async function addToGoogleAgenda(contactId, projectIndex){
-  const c = await getContact(contactId);
-  if(!c) return;
-  const p = (Array.isArray(c.projects) ? c.projects : [])[projectIndex];
-  if(!p) return;
-  if(!p.follow){
-    alert("Ajoutez d’abord une date de rappel à ce projet.");
-    return;
-  }
-
-  const m = String(p.follow).match(/^(\d{4})-(\d{2})-(\d{2})/);
-  if(!m){
-    alert("La date de rappel est invalide.");
-    return;
-  }
-
-  const y=m[1], mo=m[2], d=m[3];
-  const dt=new Date(Number(y),Number(mo)-1,Number(d)+1);
-  const end=dt.getFullYear()+String(dt.getMonth()+1).padStart(2,'0')+String(dt.getDate()).padStart(2,'0');
-  const start=y+mo+d;
-
-  const details=[
-    c.company ? "Société : "+c.company : "",
-    c.name ? "Client : "+c.name : "",
-    c.boat ? "Bateau : "+c.boat : "",
-    p.status ? "Statut : "+normalizeStatus(p.status) : "",
-    p.note ? "Note : "+p.note : ""
-  ].filter(Boolean).join("\n");
-
-  const url="https://calendar.google.com/calendar/render?action=TEMPLATE"
-    +"&text="+encodeURIComponent(p.name || "Projet DECOSHIP")
-    +"&dates="+start+"/"+end
-    +"&details="+encodeURIComponent(details);
-
-  window.open(url,"_blank");
-}
-
-function showContact(id){
+async function showContact(id){
   let x=await getContact(id);
   if(!x)return;
 
@@ -662,7 +624,7 @@ function showContact(id){
       (p.note?'<div class="detailValue" style="margin-top:9px">'+esc(p.note)+'</div>':'')+
       (p.photos&&p.photos.length?'<div class="detailPhotos">'+p.photos.map(src=>'<img src="'+src+'">').join('')+'</div>':'')+
       (p.drawing?'<img class="drawing" src="'+p.drawing+'">':'')+
-      '<div class="projectActions"><button class="orange" onclick="editContact('+x.id+',\''+p.id+'\','+projectIndex+')">✏️ Modifier</button><button class="alt" onclick="addToGoogleAgenda('+x.id+','+projectIndex+')">📅 Ajouter à Google Agenda</button><button class="danger" onclick="deleteProject('+x.id+','+projectIndex+')">🗑️ Supprimer</button></div>'+
+      '<div class="projectActions"><button class="orange" onclick="editContact('+x.id+',\''+p.id+'\','+projectIndex+')">✏️ Modifier</button><button class="danger" onclick="deleteProject('+x.id+','+projectIndex+')">🗑️ Supprimer</button></div><div class="projectActions"><button class="alt" onclick="googleAgenda('+x.id+','+projectIndex+')">📅 Ajouter à Google Agenda</button></div>'+
       '</div>';
   });
 
@@ -836,5 +798,52 @@ $('restoreFile').onchange=async(e)=>{
   }
 })();
 </script>
+
+<script>
+async function googleAgenda(contactId, projectIndex){
+  try{
+    const c=await getContact(contactId);
+    if(!c)return;
+    const projects=Array.isArray(c.projects)?c.projects:[];
+    const p=projects[projectIndex];
+    if(!p)return;
+
+    if(!p.follow){
+      alert("Ajoutez d’abord une date de rappel à ce projet.");
+      return;
+    }
+
+    const m=String(p.follow).match(/^(\d{4})-(\d{2})-(\d{2})/);
+    if(!m){
+      alert("La date de rappel est invalide.");
+      return;
+    }
+
+    const start=m[1]+m[2]+m[3];
+    const next=new Date(Number(m[1]),Number(m[2])-1,Number(m[3])+1);
+    const pad=n=>String(n).padStart(2,"0");
+    const end=next.getFullYear()+pad(next.getMonth()+1)+pad(next.getDate());
+
+    const details=[
+      c.company?"Société : "+c.company:"",
+      c.name?"Client : "+c.name:"",
+      c.boat?"Bateau : "+c.boat:"",
+      p.status?"Statut : "+p.status:"",
+      p.note?"Note : "+p.note:""
+    ].filter(Boolean).join("\n");
+
+    const url="https://calendar.google.com/calendar/render?action=TEMPLATE"
+      +"&text="+encodeURIComponent(p.name||"Projet DECOSHIP")
+      +"&dates="+start+"/"+end
+      +"&details="+encodeURIComponent(details);
+
+    window.open(url,"_blank");
+  }catch(e){
+    console.error(e);
+    alert("Impossible d’ouvrir Google Agenda.");
+  }
+}
+</script>
+
 </body>
 </html>
