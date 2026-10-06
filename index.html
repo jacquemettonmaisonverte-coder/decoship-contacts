@@ -430,7 +430,7 @@ function renderPhotoList(){
   editingPhotos.forEach((src,i)=>{
     const wrap=document.createElement('div');
     wrap.style.position='relative';
-    wrap.innerHTML='<img src="'+src+'" style="width:100%;aspect-ratio:1;object-fit:cover;border-radius:12px"><button type="button" class="orange" style="position:absolute;right:5px;top:5px;min-height:34px;padding:5px 9px;border-radius:10px" onclick="deletePhoto('+i+')">✕</button>';
+    wrap.innerHTML='<img class="editPhotoThumb" src="'+src+'" data-photo-src="'+encodeURIComponent(src)+'" style="width:100%;aspect-ratio:1;object-fit:cover;border-radius:12px;cursor:zoom-in"><button type="button" class="orange" style="position:absolute;right:5px;top:5px;min-height:34px;padding:5px 9px;border-radius:10px;z-index:2" onclick="event.stopPropagation();deletePhoto('+i+')">✕</button>';
     box.appendChild(wrap);
   });
   $('photoHelp').textContent=editingPhotos.length
@@ -711,6 +711,24 @@ async function showContact(id){
   view('detail');
 }
 
+
+function initEditPhotoViewer(){
+  const box=$("photos");
+  const viewer=$("photoViewer");
+  const img=$("photoViewerImg");
+  const close=$("photoViewerClose");
+  if(!box||!viewer||!img||!close)return;
+  box.addEventListener("click",function(e){
+    const photo=e.target.closest(".editPhotoThumb");
+    if(!photo)return;
+    e.preventDefault();
+    e.stopPropagation();
+    img.src=photo.src;
+    viewer.classList.add("open");
+    viewer.setAttribute("aria-hidden","false");
+  });
+}
+initEditPhotoViewer();
 
 function initPhotoViewer(){
   const box=$("detailBox");
