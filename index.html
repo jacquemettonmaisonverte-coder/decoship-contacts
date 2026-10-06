@@ -6,7 +6,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="theme-color" content="#0C6B74">
-<title>V12.18 - DECOSHIP Contacts</title>
+<title>V13.24 - DECOSHIP Contacts</title>
 <style>
 :root{--d:#0C6B74;--b:#1C93A9;--o:#F08628;--y:#FCC019;--bg:#f3f7f7;--ink:#17343a;--muted:#6e858a}
 *{box-sizing:border-box}body{margin:0;background:var(--bg);font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display",Arial,sans-serif;color:var(--ink)}
@@ -41,6 +41,8 @@ canvas{width:100%;height:250px;border:2px dashed #c8d8da;border-radius:14px;back
 .photoViewer img{display:block;max-width:96vw;max-height:90vh;width:auto;height:auto;object-fit:contain;border-radius:8px;touch-action:pinch-zoom;-webkit-user-select:none;user-select:none}
 .photoViewerClose{position:absolute;right:14px;top:14px;width:48px;height:48px;border:0;border-radius:50%;background:#fff;color:#222;font-size:32px;line-height:48px;padding:0;z-index:3}
 .detailPhotos img{cursor:zoom-in!important}
+.materialBox{margin-bottom:14px;padding:12px;border:1px solid #d7e4e6;border-radius:14px;background:#fbfdfd}.materialBox h3{margin:0 0 8px;font-size:17px}.materialRow{border:1px solid #dbe7e9;border-radius:12px;padding:10px;margin-top:10px;background:#fff}.materialRowHead{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:7px}.materialRowTitle{font-weight:800;color:var(--d)}.materialGrid{display:grid;grid-template-columns:1fr 1fr;gap:8px}.materialGrid .full{grid-column:1/-1}.materialDelete{min-height:38px!important;padding:7px 11px!important;border-radius:10px!important;font-size:13px!important}.materialSummary{margin-top:9px;padding:9px;border-radius:10px;background:#f3f8f8;border:1px solid #dce9ea}.materialSummaryTitle{font-weight:800;margin-bottom:5px}.materialSummaryRow{padding:6px 0;border-top:1px solid #e0eaeb;font-size:13px}.materialSummaryRow:first-of-type{border-top:0}.materialSummaryRow strong{color:var(--d)}
+@media(max-width:650px){.materialGrid{grid-template-columns:1fr}.materialGrid .full{grid-column:auto}}
 </style>
 </head>
 
@@ -99,6 +101,13 @@ canvas{width:100%;height:250px;border:2px dashed #c8d8da;border-radius:14px;back
 <label class="checkChoice"><input type="checkbox" id="balancePaid" value="paid"><span class="fakeCheck"></span><span>Réglé</span></label>
 </div>
 <div class="row"><div><label>Total facture (€)</label><input id="invoiceAmount" type="number" min="0" step="0.01" inputmode="decimal" placeholder="0,00"></div></div>
+</div>
+<div class="materialBox">
+<h3>🧴 Matières / adhésifs utilisés</h3>
+<div class="muted">Ajoute autant de matières que nécessaire pour ce projet. Chaque ligne peut être modifiée ou supprimée séparément.</div>
+<div id="materials"></div>
+<button type="button" class="alt" id="addMaterial"  style="margin-top:10px;width:100%">＋ Ajouter une matière</button>
+<div id="materialHelp" class="muted" style="margin-top:8px"></div>
 </div>
 <div class="card">
 <h2>📝 Note</h2>
@@ -331,10 +340,11 @@ function normalizeContact(c){
       note:c.note||'',
       drawing:c.drawing||'',
       noteType:c.noteType||'keyboard',
-      photos:Array.isArray(c.photos)?c.photos.slice():[]
+      photos:Array.isArray(c.photos)?c.photos.slice():[],
+      materials:Array.isArray(c.materials)?JSON.parse(JSON.stringify(c.materials)):[]
     }];
   } else {
-    c.projects=c.projects.map(p=>({...p,status:normalizeStatus(p.status),quoteAmount:p.quoteAmount??'',depositAmount:p.depositAmount??'',depositStatus:p.depositStatus||'pending',balanceStatus:p.balanceStatus||'pending',invoiceAmount:p.invoiceAmount??''}));
+    c.projects=c.projects.map(p=>({...p,status:normalizeStatus(p.status),quoteAmount:p.quoteAmount??'',depositAmount:p.depositAmount??'',depositStatus:p.depositStatus||'pending',balanceStatus:p.balanceStatus||'pending',invoiceAmount:p.invoiceAmount??'',materials:Array.isArray(p.materials)?p.materials:[]}));
   }
   return c;
 }
@@ -424,6 +434,34 @@ $('noteStylusBtn').onclick=()=>{
 setNoteMode('keyboard');
 $('clear').onclick=()=>{ctx.clearRect(0,0,pad.width/scale,pad.height/scale)};
 
+function renderMaterials(){
+  const box=$('materials');
+  if(!box)return;
+  box.innerHTML='';
+  editingMaterials.forEach((m,i)=>{
+    const row=document.createElement('div');
+    row.className='materialRow';
+    row.innerHTML='<div class="materialRowHead"><div class="materialRowTitle">Matière '+(i+1)+'</div><button type="button" class="danger materialDelete" data-material-delete="'+i+'">✕ Supprimer</button></div><div class="materialGrid"><div class="full"><label>Nom matière</label><input data-material="name" data-index="'+i+'" placeholder="Ex. 3M 2080"></div><div><label>Marque</label><input data-material="brand" data-index="'+i+'" placeholder="Marque"></div><div><label>Référence</label><input data-material="reference" data-index="'+i+'" placeholder="Référence"></div><div><label>Couleur</label><input data-material="color" data-index="'+i+'" placeholder="Couleur"></div><div><label>Longueur (m)</label><input data-material="length" data-index="'+i+'" type="number" min="0" step="0.01" inputmode="decimal" placeholder="0,00"></div><div><label>Prix d’achat TTC (€)</label><input data-material="priceTtc" data-index="'+i+'" type="number" min="0" step="0.01" inputmode="decimal" placeholder="0,00"></div></div>';
+    box.appendChild(row);
+  });
+  box.querySelectorAll('[data-material]').forEach(el=>{
+    el.value=editingMaterials[Number(el.dataset.index)]?.[el.dataset.material] ?? '';
+    el.addEventListener('input',()=>{ editingMaterials[Number(el.dataset.index)][el.dataset.material]=el.value; });
+  });
+  box.querySelectorAll('[data-material-delete]').forEach(btn=>btn.onclick=()=>{
+    const i=Number(btn.dataset.materialDelete);
+    if(confirm('Supprimer cette matière ?')){ editingMaterials.splice(i,1); renderMaterials(); }
+  });
+  $('materialHelp').textContent=editingMaterials.length ? editingMaterials.length+' matière(s) renseignée(s).' : 'Aucune matière renseignée.';
+}
+function addMaterial(){
+  editingMaterials.push({name:'',brand:'',reference:'',color:'',length:'',priceTtc:''});
+  renderMaterials();
+}
+window.addMaterial=addMaterial;
+setTimeout(()=>{ const b=document.getElementById('addMaterial'); if(b){ b.addEventListener('click',e=>{e.preventDefault(); addMaterial();}); } },0);
+
+
 function renderPhotoList(){
   const box=$('photos');
   box.innerHTML='';
@@ -491,7 +529,7 @@ function esc(s){
   }[m]));
 }
 
-let editingId=null,editingProjectId=null,editingProjectIndex=null,editingPhotos=[];
+let editingId=null,editingProjectId=null,editingProjectIndex=null,editingPhotos=[],editingMaterials=[];
 
 function clearCanvas(){
   ctx.clearRect(0,0,pad.width/scale,pad.height/scale);
@@ -509,6 +547,8 @@ function reset(){
   editingProjectId=null;
   editingProjectIndex=null;
   editingPhotos=[];
+  editingMaterials=[];
+  renderMaterials();
   setNoteMode('keyboard');
   $('formTitle').textContent='Nouveau contact';
   $('save').textContent='💾 Enregistrer le contact';
@@ -532,6 +572,8 @@ async function editContact(id,projectId=null,projectIndex=null){
   const p = isNewProject ? null : (editingProjectIndex!==null ? projects[editingProjectIndex] : (projectId ? projects.find(v=>String(v.id)===String(projectId)) : projects[0]));
   if(!p && projectId!==null && !isNewProject)return;
   editingPhotos=p ? (Array.isArray(p.photos)?p.photos.slice():[]) : [];
+  editingMaterials=p ? (Array.isArray(p.materials)?JSON.parse(JSON.stringify(p.materials)):[]) : [];
+  renderMaterials();
 
   $('formTitle').textContent=projectId===null ? 'Modifier le contact' : (isNewProject ? 'Nouveau projet' : 'Modifier le projet');
   $('save').textContent=projectId===null?'💾 Enregistrer les modifications':'💾 Enregistrer le projet';
@@ -546,6 +588,8 @@ async function editContact(id,projectId=null,projectIndex=null){
   $('quoteAmount').value=p && p.quoteAmount!=='' && p.quoteAmount!=null ? p.quoteAmount : '';
   $('depositAmount').value=p && p.depositAmount!=='' && p.depositAmount!=null ? p.depositAmount : '';
   $('invoiceAmount').value=p && p.invoiceAmount!=='' && p.invoiceAmount!=null ? p.invoiceAmount : '';
+  editingMaterials=p ? (Array.isArray(p.materials)?JSON.parse(JSON.stringify(p.materials)):[]) : [];
+  renderMaterials();
   $('depositPending').checked=!p || p.depositStatus!=='paid';
   $('depositPaid').checked=!!p && p.depositStatus==='paid';
   $('balancePending').checked=!p || p.balanceStatus!=='paid';
@@ -580,7 +624,8 @@ $('save').onclick=async()=>{
     note:$('note').value,
     drawing:noteMode==='stylus'?pad.toDataURL():'',
     noteType:noteMode,
-    photos:editingPhotos.slice()
+    photos:editingPhotos.slice(),
+    materials:editingMaterials.map(m=>({name:String(m.name||'').trim(),brand:String(m.brand||'').trim(),reference:String(m.reference||'').trim(),color:String(m.color||'').trim(),length:String(m.length||'').trim(),priceTtc:String(m.priceTtc||'').trim()}))
   };
 
   try{
@@ -598,7 +643,7 @@ $('save').onclick=async()=>{
       const first=projects[0]||project;
       const updated={...old, name:$('name').value, company:$('company').value, boat:$('boat').value, phone:$('phone').value, email:$('email').value, projects};
       // Keep legacy fields synchronized with the first project for compatibility.
-      updated.project=first.name; updated.status=first.status; updated.follow=first.follow; updated.quoteAmount=first.quoteAmount; updated.depositAmount=first.depositAmount; updated.depositStatus=first.depositStatus; updated.balanceStatus=first.balanceStatus; updated.invoiceAmount=first.invoiceAmount; updated.note=first.note; updated.drawing=first.drawing; updated.noteType=first.noteType; updated.photos=first.photos;
+      updated.project=first.name; updated.status=first.status; updated.follow=first.follow; updated.quoteAmount=first.quoteAmount; updated.depositAmount=first.depositAmount; updated.depositStatus=first.depositStatus; updated.balanceStatus=first.balanceStatus; updated.invoiceAmount=first.invoiceAmount; updated.note=first.note; updated.drawing=first.drawing; updated.noteType=first.noteType; updated.photos=first.photos; updated.materials=first.materials||[];
       await dbPut(updated);
       alert(editingProjectIndex!==null && editingProjectIndex>=0?'Projet modifié':'Projet ajouté au client');
     }else{
@@ -607,7 +652,7 @@ $('save').onclick=async()=>{
         name:$('name').value, company:$('company').value, boat:$('boat').value, phone:$('phone').value, email:$('email').value,
         projects:[project],
         // Legacy fields kept for compatibility with older versions.
-        project:project.name,status:project.status,follow:project.follow,quoteAmount:project.quoteAmount,depositAmount:project.depositAmount,depositStatus:project.depositStatus,balanceStatus:project.balanceStatus,invoiceAmount:project.invoiceAmount,note:project.note,drawing:project.drawing,noteType:project.noteType,photos:project.photos
+        project:project.name,status:project.status,follow:project.follow,quoteAmount:project.quoteAmount,depositAmount:project.depositAmount,depositStatus:project.depositStatus,balanceStatus:project.balanceStatus,invoiceAmount:project.invoiceAmount,note:project.note,drawing:project.drawing,noteType:project.noteType,photos:project.photos,materials:project.materials||[]
       };
       await dbPut(obj);
       alert('Contact enregistré');
@@ -700,6 +745,7 @@ async function showContact(id){
       '<div class="projectHead"><div><b>⛵ '+esc(p.name||'Projet sans nom')+'</b><div class="muted">'+esc(normalizeStatus(p.status))+(p.follow?' · Rappel : '+esc(p.follow):'')+'</div></div><span class="projectStatus '+statusClass(normalizeStatus(p.status))+'">'+esc(normalizeStatus(p.status))+'</span></div>'+
       '<div class="amounts financeSummary"><div><strong>💶 Suivi financier</strong></div><div>Devis : '+(p.quoteAmount!==''&&p.quoteAmount!=null?esc(money(p.quoteAmount)):'—')+'</div><div>Acompte : '+(p.depositAmount!==''&&p.depositAmount!=null?esc(money(p.depositAmount)):'—')+' &nbsp; '+(p.depositStatus==='paid'?'☑ Réglé':'☐ En attente')+'</div>'+(p.depositStatus==='paid'?'<div>Solde : '+esc(money(Math.max(0,Number(p.quoteAmount||0)-Number(p.depositAmount||0))))+' &nbsp; '+(p.balanceStatus==='paid'?'☑ Réglé':'☐ En attente')+'</div>':'')+'<div>Total facture : '+(p.invoiceAmount!==''&&p.invoiceAmount!=null?esc(money(p.invoiceAmount)):'—')+'</div></div>'+
       (p.note?'<div class="detailValue" style="margin-top:9px">'+esc(p.note)+'</div>':'')+
+      (Array.isArray(p.materials)&&p.materials.length?'<div class="materialSummary"><div class="materialSummaryTitle">🧴 Matières / adhésifs utilisés</div>'+p.materials.map((m,i)=>'<div class="materialSummaryRow"><strong>'+esc((i+1)+'. '+(m.name||'Matière sans nom'))+'</strong><br>Marque : '+esc(m.brand||'—')+' · Référence : '+esc(m.reference||'—')+' · Couleur : '+esc(m.color||'—')+'<br>Longueur : '+esc(m.length||'—')+' m · Prix TTC : '+esc(m.priceTtc?money(m.priceTtc):'—')+'</div>').join('')+'</div>':'')+
       (p.photos&&p.photos.length?'<div class="detailPhotos">'+p.photos.map(src=>'<img src="'+src+'">').join('')+'</div>':'')+
       (p.drawing?'<img class="drawing" src="'+p.drawing+'">':'')+
       '<div class="projectActions"><button class="orange" onclick="editContact('+x.id+',\''+p.id+'\','+projectIndex+')">✏️ Modifier</button><button class="danger" onclick="deleteProject('+x.id+','+projectIndex+')">🗑️ Supprimer</button></div>'+
