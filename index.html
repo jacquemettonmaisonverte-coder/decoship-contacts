@@ -459,7 +459,8 @@ function addMaterial(){
   renderMaterials();
 }
 window.addMaterial=addMaterial;
-setTimeout(()=>{ const b=document.getElementById('addMaterial'); if(b){ b.addEventListener('click',e=>{e.preventDefault(); addMaterial();}); } },0);
+const addMaterialButton=document.getElementById('addMaterial');
+if(addMaterialButton) addMaterialButton.onclick=(e)=>{e.preventDefault(); addMaterial();};
 
 
 function renderPhotoList(){
@@ -745,7 +746,7 @@ async function showContact(id){
       '<div class="projectHead"><div><b>⛵ '+esc(p.name||'Projet sans nom')+'</b><div class="muted">'+esc(normalizeStatus(p.status))+(p.follow?' · Rappel : '+esc(p.follow):'')+'</div></div><span class="projectStatus '+statusClass(normalizeStatus(p.status))+'">'+esc(normalizeStatus(p.status))+'</span></div>'+
       '<div class="amounts financeSummary"><div><strong>💶 Suivi financier</strong></div><div>Devis : '+(p.quoteAmount!==''&&p.quoteAmount!=null?esc(money(p.quoteAmount)):'—')+'</div><div>Acompte : '+(p.depositAmount!==''&&p.depositAmount!=null?esc(money(p.depositAmount)):'—')+' &nbsp; '+(p.depositStatus==='paid'?'☑ Réglé':'☐ En attente')+'</div>'+(p.depositStatus==='paid'?'<div>Solde : '+esc(money(Math.max(0,Number(p.quoteAmount||0)-Number(p.depositAmount||0))))+' &nbsp; '+(p.balanceStatus==='paid'?'☑ Réglé':'☐ En attente')+'</div>':'')+'<div>Total facture : '+(p.invoiceAmount!==''&&p.invoiceAmount!=null?esc(money(p.invoiceAmount)):'—')+'</div></div>'+
       (p.note?'<div class="detailValue" style="margin-top:9px">'+esc(p.note)+'</div>':'')+
-      (Array.isArray(p.materials)&&p.materials.length?'<div class="materialSummary"><div class="materialSummaryTitle">🧴 Matières / adhésifs utilisés</div>'+p.materials.map((m,i)=>'<div class="materialSummaryRow"><strong>'+esc((i+1)+'. '+(m.name||'Matière sans nom'))+'</strong><br>Marque : '+esc(m.brand||'—')+' · Référence : '+esc(m.reference||'—')+' · Couleur : '+esc(m.color||'—')+'<br>Longueur : '+esc(m.length||'—')+' m · Prix TTC : '+esc(m.priceTtc?money(m.priceTtc):'—')+'</div>').join('')+'</div>':'')+
+      '<div class="materialSummary"><div class="materialSummaryTitle">🧴 Matières / adhésifs utilisés</div>'+(Array.isArray(p.materials)&&p.materials.length?p.materials.map((m,i)=>'<div class="materialSummaryRow"><strong>'+esc((i+1)+'. '+(m.name||'Matière sans nom'))+'</strong><br>Marque : '+esc(m.brand||'—')+' · Référence : '+esc(m.reference||'—')+' · Couleur : '+esc(m.color||'—')+'<br>Longueur : '+esc(m.length||'—')+' m · Prix TTC : '+esc(m.priceTtc?money(m.priceTtc):'—')+'</div>').join(''):'<div class="muted">Aucune matière renseignée pour ce projet.</div>')+'</div>'+
       (p.photos&&p.photos.length?'<div class="detailPhotos">'+p.photos.map(src=>'<img src="'+src+'">').join('')+'</div>':'')+
       (p.drawing?'<img class="drawing" src="'+p.drawing+'">':'')+
       '<div class="projectActions"><button class="orange" onclick="editContact('+x.id+',\''+p.id+'\','+projectIndex+')">✏️ Modifier</button><button class="danger" onclick="deleteProject('+x.id+','+projectIndex+')">🗑️ Supprimer</button></div>'+
