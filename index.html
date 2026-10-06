@@ -713,16 +713,16 @@ async function showContact(id){
 
 
 function initEditPhotoViewer(){
-  const box=$("photos");
-  const viewer=$("photoViewer");
-  const img=$("photoViewerImg");
-  const close=$("photoViewerClose");
-  if(!box||!viewer||!img||!close)return;
-  box.addEventListener("click",function(e){
-    const photo=e.target.closest(".editPhotoThumb");
+  if(window.__editPhotoViewerReady)return;
+  window.__editPhotoViewerReady=true;
+  document.addEventListener("click",function(e){
+    const photo=e.target.closest("#photos .editPhotoThumb");
     if(!photo)return;
     e.preventDefault();
     e.stopPropagation();
+    const viewer=$("photoViewer");
+    const img=$("photoViewerImg");
+    if(!viewer||!img)return;
     img.src=photo.src;
     viewer.classList.add("open");
     viewer.setAttribute("aria-hidden","false");
