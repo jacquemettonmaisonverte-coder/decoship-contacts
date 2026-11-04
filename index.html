@@ -6,7 +6,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="theme-color" content="#0C6B74">
-<title>V13.24 - DECOSHIP Contacts</title>
+<title>V14.9 - DECOSHIP Contacts - Cloudflare</title>
 <style>
 :root{--d:#0C6B74;--b:#1C93A9;--o:#F08628;--y:#FCC019;--bg:#f3f7f7;--ink:#17343a;--muted:#6e858a}
 *{box-sizing:border-box}body{margin:0;background:var(--bg);font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display",Arial,sans-serif;color:var(--ink)}
@@ -22,8 +22,8 @@ input,select,textarea{width:100%;padding:13px;border:1px solid #d4e0e2;border-ra
 .toolbar{display:flex;gap:8px;flex-wrap:wrap}.toolbar button{min-height:42px;padding:9px 12px;font-size:14px}
 canvas{width:100%;height:250px;border:2px dashed #c8d8da;border-radius:14px;background:#fff;touch-action:none}
 .photos{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}.photos img{width:100%;aspect-ratio:1;object-fit:cover;border-radius:12px}
-.contact{padding:13px 0;border-bottom:1px solid #e6eeee;display:flex;justify-content:space-between;gap:10px;cursor:pointer}.contact:last-child{border-bottom:0}.contact:active{background:#f1f8f9;border-radius:12px}.badge{background:#edf6f7;color:var(--d);padding:6px 9px;border-radius:10px;font-size:12px;white-space:nowrap}.muted{color:var(--muted);font-size:13px}.detailRow{padding:9px 0;border-bottom:1px solid #e8eeee}.detailLabel{font-size:11px;font-weight:800;color:#668087;text-transform:uppercase;letter-spacing:.5px}.detailValue{font-size:16px;margin-top:2px;white-space:pre-wrap}.detailPhotos{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:10px}.detailPhotos img{width:100%;aspect-ratio:1;object-fit:cover;border-radius:12px}.drawing{width:100%;border:1px solid #d4e0e2;border-radius:12px;margin-top:8px;background:#fff}.projectCard{border:1px solid #dbe7e9;border-radius:14px;padding:12px;margin-top:10px;background:#fbfdfd}.projectHead{display:flex;justify-content:space-between;align-items:flex-start;gap:10px}.projectStatus{display:inline-flex;align-items:center;gap:6px;padding:6px 9px;border-radius:999px;font-size:12px;font-weight:800;white-space:nowrap}.status-demande{background:#2196f3;color:#fff;box-shadow:0 2px 5px rgba(33,150,243,.28)}.status-devis{background:#ff9800;color:#fff;box-shadow:0 2px 5px rgba(255,152,0,.28)}.status-attente{background:#9c27b0;color:#fff;box-shadow:0 2px 5px rgba(156,39,176,.28)}.status-accepte{background:#2e7d32;color:#fff;box-shadow:0 2px 5px rgba(46,125,50,.28)}.status-produire{background:#1565c0;color:#fff;box-shadow:0 2px 5px rgba(21,101,192,.28)}.status-poser{background:#00897b;color:#fff;box-shadow:0 2px 5px rgba(0,137,123,.28)}.status-acompte{background:#00838f;color:#fff;box-shadow:0 2px 5px rgba(0,131,143,.28)}.status-facturer{background:#e53935;color:#fff;box-shadow:0 2px 5px rgba(229,57,53,.28)}.projectMini{border:1px solid #e2ebed;border-radius:12px;padding:10px;margin-top:8px;background:#fff}.projectMiniTop{display:flex;justify-content:space-between;gap:8px;align-items:center}.projectMiniName{font-weight:800}.amounts{display:flex;gap:14px;flex-wrap:wrap;margin-top:7px}.amount{font-size:12px;color:#5e7479}.amount strong{color:#17343a}.projectActions{display:flex;gap:8px;margin-top:10px;flex-wrap:wrap}.projectActions button{min-height:40px;padding:9px 12px;font-size:14px}
-.search{margin-bottom:10px}.quickFilters{display:flex;gap:7px;overflow-x:auto;padding:2px 0 9px;margin-bottom:2px;-webkit-overflow-scrolling:touch}.quickFilter{flex:0 0 auto;min-height:38px;padding:8px 11px;border-radius:999px;background:#edf4f5;color:#42656b;font-size:12px;font-weight:850;box-shadow:none}.quickFilter.active{color:#fff}.quickFilter[data-filter=""]{background:#0C6B74}.quickFilter[data-filter="Demande"].active{background:#2196f3}.quickFilter[data-filter="Devis"].active{background:#ff9800}.quickFilter[data-filter="En attente"].active{background:#9c27b0}.quickFilter[data-filter="Accepté"].active{background:#2e7d32}.quickFilter[data-filter="Acompte"].active{background:#00838f}.quickFilter[data-filter="À produire"].active{background:#1565c0}.quickFilter[data-filter="À poser"].active{background:#00897b}.quickFilter[data-filter="À facturer"].active{background:#e53935}.empty{text-align:center;color:var(--muted);padding:25px 10px}.top{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}.editbar{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:14px}
+.contact{padding:13px 0;border-bottom:1px solid #e6eeee;display:flex;justify-content:space-between;gap:10px;cursor:pointer}.contact:last-child{border-bottom:0}.contact:active{background:#f1f8f9;border-radius:12px}.badge{background:#edf6f7;color:var(--d);padding:6px 9px;border-radius:10px;font-size:12px;white-space:nowrap}.muted{color:var(--muted);font-size:13px}.detailRow{padding:9px 0;border-bottom:1px solid #e8eeee}.detailLabel{font-size:11px;font-weight:800;color:#668087;text-transform:uppercase;letter-spacing:.5px}.detailValue{font-size:16px;margin-top:2px;white-space:pre-wrap}.detailPhotos{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:10px}.detailPhotos img{width:100%;aspect-ratio:1;object-fit:cover;border-radius:12px}.drawing{width:100%;border:1px solid #d4e0e2;border-radius:12px;margin-top:8px;background:#fff}.projectCard{border:1px solid #dbe7e9;border-radius:14px;padding:12px;margin-top:10px;background:#fbfdfd}.projectHead{display:flex;justify-content:space-between;align-items:flex-start;gap:10px}.projectStatus{display:inline-flex;align-items:center;gap:6px;padding:6px 9px;border-radius:999px;font-size:12px;font-weight:800;white-space:nowrap}.status-demande{background:#2196f3;color:#fff;box-shadow:0 2px 5px rgba(33,150,243,.28)}.status-rdv{background:#e53935;color:#fff;box-shadow:0 2px 5px rgba(229,57,53,.28)}.status-attente{background:#9c27b0;color:#fff;box-shadow:0 2px 5px rgba(156,39,176,.28)}.status-termine{background:#455a64;color:#fff;box-shadow:0 2px 5px rgba(69,90,100,.28)}.status-production{background:#00897b;color:#fff;box-shadow:0 2px 5px rgba(0,137,123,.28)}.projectMini{border:1px solid #e2ebed;border-radius:12px;padding:10px;margin-top:8px;background:#fff}.projectMiniTop{display:flex;justify-content:space-between;gap:8px;align-items:center}.projectMiniName{font-weight:800}.amounts{display:flex;gap:14px;flex-wrap:wrap;margin-top:7px}.amount{font-size:12px;color:#5e7479}.amount strong{color:#17343a}.projectActions{display:flex;gap:8px;margin-top:10px;flex-wrap:wrap}.projectActions button{min-height:40px;padding:9px 12px;font-size:14px}
+.search{margin-bottom:10px}.quickFilters{display:flex;gap:7px;overflow-x:auto;padding:2px 0 9px;margin-bottom:2px;-webkit-overflow-scrolling:touch}.quickFilter{flex:0 0 auto;min-height:38px;padding:8px 11px;border-radius:999px;background:#edf4f5;color:#42656b;font-size:12px;font-weight:850;box-shadow:none}.quickFilter.active{color:#fff}.quickFilter[data-filter=""]{background:#0C6B74}.quickFilter[data-filter="Demande"].active{background:#2196f3}.quickFilter[data-filter="Rendez-vous"].active{background:#e53935}.quickFilter[data-filter="En attente"].active{background:#9c27b0}.quickFilter[data-filter="Terminé"].active{background:#455a64}.quickFilter[data-filter="À produire/poser"].active{background:#00897b}.empty{text-align:center;color:var(--muted);padding:25px 10px}.top{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}.editbar{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:14px}
 @media(max-width:650px){.row{grid-template-columns:1fr}.actions{grid-template-columns:1fr 1fr}main{padding:10px}}
 .financeBox{margin-top:10px;padding:12px;border:1px solid #ddd;border-radius:10px;background:#fafafa}.financeBox h3{margin:0 0 10px;font-size:16px}.financeLine{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-top:9px}.financeLine strong{min-width:75px}.financeLine label{display:inline-flex;align-items:center;gap:4px}#balanceFormAmount{font-weight:700}.financeSummary{display:flex;flex-direction:column;gap:4px;margin-top:8px;padding:8px;border-radius:8px;background:#f5f5f5}
 
@@ -43,13 +43,48 @@ canvas{width:100%;height:250px;border:2px dashed #c8d8da;border-radius:14px;back
 .detailPhotos img{cursor:zoom-in!important}
 .materialBox{margin-bottom:14px;padding:12px;border:1px solid #d7e4e6;border-radius:14px;background:#fbfdfd}.materialBox h3{margin:0 0 8px;font-size:17px}.materialRow{border:1px solid #dbe7e9;border-radius:12px;padding:10px;margin-top:10px;background:#fff}.materialRowHead{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:7px}.materialRowTitle{font-weight:800;color:var(--d)}.materialGrid{display:grid;grid-template-columns:1fr 1fr;gap:8px}.materialGrid .full{grid-column:1/-1}.materialDelete{min-height:38px!important;padding:7px 11px!important;border-radius:10px!important;font-size:13px!important}.materialSummary{margin-top:9px;padding:9px;border-radius:10px;background:#f3f8f8;border:1px solid #dce9ea}.materialSummaryTitle{font-weight:800;margin-bottom:5px}.materialSummaryRow{padding:6px 0;border-top:1px solid #e0eaeb;font-size:13px}.materialSummaryRow:first-of-type{border-top:0}.materialSummaryRow strong{color:var(--d)}
 @media(max-width:650px){.materialGrid{grid-template-columns:1fr}.materialGrid .full{grid-column:auto}}
+
+.coverBox{margin:12px 0;padding:14px;border:1px solid #e7d5c8;border-radius:14px;background:#fffaf6}
+.coverBox h3{margin:0 0 7px;font-size:17px;color:#a94f20}
+.coverSettings{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;align-items:end;margin:12px 0}
+.coverMetric{background:#f4eee9;border-radius:10px;padding:9px}
+.coverMetric small{display:block;color:#76675e;font-size:11px}
+.coverMetric strong{display:block;color:#bd5c26;font-size:19px;margin-top:3px}
+.coverItem{background:#fff;border:1px solid #eadfd7;border-radius:12px;padding:11px;margin-top:9px}
+.coverItemHead{display:flex;justify-content:space-between;gap:8px;align-items:center;margin-bottom:8px}
+.coverItemHead strong{font-size:14px}
+.coverItem .coverFields{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+.coverItem label{font-size:11px}
+.coverItem input,.coverItem select{margin:3px 0 6px;padding:9px;font-size:14px}
+.coverEdges{display:grid;grid-template-columns:repeat(4,1fr);gap:5px;margin:5px 0}
+.coverEdges label{background:#f7f4f1;border-radius:7px;padding:7px 3px;text-align:center;font-size:11px}
+.coverEdges input{width:auto;margin:0 3px 0 0}
+.coverDim{background:#f7f3ee;border-radius:8px;padding:8px;font-size:12px;margin-top:6px}
+.coverLayout{margin-top:10px;padding:9px;background:#f5f7f7;border-radius:9px;font-size:12px;line-height:1.5}
+@media(max-width:650px){.coverSettings{grid-template-columns:1fr 1fr}.coverSettings>div:first-child{grid-column:1/-1}}
+
 </style>
+
 </head>
 
 <body>
 <div id="photoViewer" class="photoViewer" style="display:none" aria-hidden="true">
   <button type="button" id="photoViewerClose" class="photoViewerClose" aria-label="Fermer">×</button>
   <img id="photoViewerImg" alt="Photo agrandie">
+</div>
+<div id="cloudOverlay" style="position:fixed;inset:0;background:#f3f7f7;z-index:2147483646;overflow:auto;padding:18px;display:flex;align-items:center;justify-content:center">
+  <div style="width:min(520px,100%);background:#fff;border-radius:20px;padding:20px;box-shadow:0 6px 30px #12343a22">
+    <h2 style="margin:0 0 6px">DECOSHIP • Synchronisation Cloudflare</h2>
+    <div style="font-size:13px;color:#6e858a;margin-bottom:16px">Entre l’adresse de l’API Cloudflare et le code d’accès partagé configuré dans Cloudflare. Tes données locales sont conservées.</div>
+    <label>Adresse de l’API Cloudflare</label>
+    <input id="apiUrl" value="https://decoship-photos-api.jacquemettonmaisonverte.workers.dev" autocapitalize="none" spellcheck="false">
+    <label>Code d’accès DECOSHIP</label>
+    <input id="apiToken" type="password" placeholder="Code configuré dans Cloudflare" autocomplete="current-password">
+    <div style="font-size:12px;color:#6e858a;margin:-5px 0 10px">Le code d’accès est mémorisé sur cet appareil après la connexion.</div>
+    <button id="connectApi" style="width:100%;margin:8px 0 14px">🔐 Connecter et synchroniser</button>
+    <div id="configState" style="font-size:13px;margin-bottom:14px"></div>
+    <div id="loginState" style="font-size:13px;margin-top:8px"></div>
+  </div>
 </div>
 <header>
 <div style="display:flex;align-items:center;gap:12px">
@@ -87,7 +122,7 @@ canvas{width:100%;height:250px;border:2px dashed #c8d8da;border-radius:14px;back
 <div class="row"><div><label>Téléphone</label><input id="phone" type="tel" placeholder="06 00 00 00 00"></div><div><label>E-mail</label><input id="email" type="email" placeholder="contact@entreprise.fr"></div></div>
 <label>Bateau / Projet</label><input id="project" placeholder="Catamaran, covering, décoration…">
 <div class="row"><div><label>Statut</label><select id="status">
-<option>Demande</option><option>Devis</option><option>En attente</option><option>Accepté</option><option value="Acompte">Acompte</option><option>À produire</option><option>À poser</option><option>À facturer</option>
+<option>Demande</option><option>Rendez-vous</option><option>En attente</option><option>Terminé</option><option>À produire/poser</option>
 </select></div><div><label>Rappel</label><input id="follow" type="date"></div></div>
 <div class="financeBox">
 <h3>💶 Suivi financier</h3>
@@ -102,6 +137,21 @@ canvas{width:100%;height:250px;border:2px dashed #c8d8da;border-radius:14px;back
 </div>
 <div class="row"><div><label>Total facture (€)</label><input id="invoiceAmount" type="number" min="0" step="0.01" inputmode="decimal" placeholder="0,00"></div></div>
 </div>
+
+<div class="coverBox">
+<h3>📐 Métrage des panneaux / portes</h3>
+<div class="muted">Relevé des éléments à recouvrir. Les mesures et le calcul du rouleau sont enregistrés dans ce projet et synchronisés avec Cloudflare.</div>
+<div class="coverSettings">
+  <div><label>Largeur du rouleau (mm)</label><input id="coverRoll" type="number" min="1" value="1200"></div>
+  <div class="coverMetric"><small>Éléments</small><strong id="coverCount">0</strong></div>
+  <div class="coverMetric"><small>Métrage estimé</small><strong id="coverLinear">0,00 m</strong></div>
+</div>
+<div id="coverItems"></div>
+<button type="button" class="alt" id="coverAdd" style="margin-top:8px;width:100%">＋ Ajouter une porte / un panneau</button>
+<div id="coverLayout" class="coverLayout"></div>
+<div class="muted" style="margin-top:8px">Calcul indicatif par rangées sur la largeur du rouleau. Le sens du veinage est respecté. Prévoir les marges et raccords de pose.</div>
+</div>
+
 <div class="materialBox">
 <h3>🧴 Matières / adhésifs utilisés</h3>
 <div class="muted">Ajoute autant de matières que nécessaire pour ce projet. Chaque ligne peut être modifiée ou supprimée séparément.</div>
@@ -141,16 +191,13 @@ canvas{width:100%;height:250px;border:2px dashed #c8d8da;border-radius:14px;back
 <div class="quickFilters" id="quickFilters" aria-label="Filtres rapides">
 <button type="button" class="quickFilter active" data-filter="">TOUS</button>
 <button type="button" class="quickFilter" data-filter="Demande">DEMANDE</button>
-<button type="button" class="quickFilter" data-filter="Devis">DEVIS</button>
+<button type="button" class="quickFilter" data-filter="Rendez-vous">RENDEZ-VOUS</button>
 <button type="button" class="quickFilter" data-filter="En attente">EN ATTENTE</button>
-<button type="button" class="quickFilter" data-filter="Acompte">ACOMPTE</button>
-<button type="button" class="quickFilter" data-filter="Accepté">ACCEPTÉ</button>
-<button type="button" class="quickFilter" data-filter="À produire">À PRODUIRE</button>
-<button type="button" class="quickFilter" data-filter="À poser">À POSER</button>
-<button type="button" class="quickFilter" data-filter="À facturer">À FACTURER</button>
+<button type="button" class="quickFilter" data-filter="Terminé">✓ TERMINÉ</button>
+<button type="button" class="quickFilter" data-filter="À produire/poser">À PRODUIRE/POSER</button>
 </div>
 <select id="statusFilter" style="margin-bottom:10px">
-<option value="">Tous les statuts</option><option>Demande</option><option>Devis</option><option>En attente</option><option>Accepté</option><option>Acompte</option><option>À produire</option><option>À poser</option><option>À facturer</option>
+<option value="">Tous les statuts</option><option>Demande</option><option>Rendez-vous</option><option>En attente</option><option>Terminé</option><option>À produire/poser</option>
 </select>
 <div id="listbox"></div>
 </div>
@@ -203,7 +250,7 @@ async function dbGetAll(){
   });
 }
 
-async function dbPut(contact){
+async function localDbPut(contact){
   const db=await openDB();
   return new Promise((resolve,reject)=>{
     const tx=db.transaction(STORE,'readwrite');
@@ -214,7 +261,7 @@ async function dbPut(contact){
   });
 }
 
-async function dbDelete(id){
+async function localDbDelete(id){
   const db=await openDB();
   return new Promise((resolve,reject)=>{
     const tx=db.transaction(STORE,'readwrite');
@@ -290,7 +337,12 @@ async function restoreContacts(file){
       tx.onabort=()=>reject(tx.error||new Error('Restauration annulée'));
     });
 
-    setBackupStatus('✅ Restauration terminée : '+contacts.length+' contact(s) restauré(s), avec photos et notes.');
+    /* Si Cloudflare est connecté, envoie aussi les fiches restaurées. */
+    if(apiToken){
+      for(const contact of contacts){ await pushCloud(contact); }
+    }
+
+    setBackupStatus('✅ Restauration terminée : '+contacts.length+' contact(s) restauré(s).'+(apiToken?' Synchronisation Cloudflare envoyée.':' Connecte Cloudflare pour synchroniser.'));
     render();
     if(window.refreshPlanning) await window.refreshPlanning();
   }catch(e){
@@ -312,7 +364,7 @@ async function migrateOldContacts(){
   const existingIds=new Set(current.map(x=>x.id));
   for(const c of old){
     if(c && c.id!=null && !existingIds.has(c.id)){
-      await dbPut(c);
+      await localDbPut(c);
     }
   }
 
@@ -321,8 +373,8 @@ async function migrateOldContacts(){
 }
 
 function normalizeStatus(s){
-  const map={'À commander':'Demande','À rappeler':'En attente','À encaisser':'À facturer','Terminé':'À facturer'};
-  return map[s]||s||'Demande';
+  const map={'À commander':'Demande','À rappeler':'En attente','À encaisser':'En attente','Devis':'En attente','Accepté':'En attente','Acompte':'En attente','À facturer':'En attente','À produire':'À produire/poser','À poser':'À produire/poser'};
+  return map[s]||(['Demande','Rendez-vous','En attente','Terminé','À produire/poser'].includes(s)?s:'Demande');
 }
 function normalizeContact(c){
   if(!c) return c;
@@ -354,7 +406,7 @@ function money(v){
   return new Intl.NumberFormat('fr-FR',{style:'currency',currency:'EUR',maximumFractionDigits:2}).format(n);
 }
 function statusClass(s){
-  return {'Demande':'status-demande','Devis':'status-devis','En attente':'status-attente','Accepté':'status-accepte','Acompte':'status-acompte','À produire':'status-produire','À poser':'status-poser','À facturer':'status-facturer'}[s]||'status-demande';
+  return {'Demande':'status-demande','Rendez-vous':'status-rdv','En attente':'status-attente','Terminé':'status-termine','À produire/poser':'status-production'}[s]||'status-demande';
 }
 
 async function getContacts(){
@@ -531,14 +583,132 @@ function esc(s){
 }
 
 let editingId=null,editingProjectId=null,editingProjectIndex=null,editingPhotos=[],editingMaterials=[];
+let editingCoverItems=[]; let coverSeq=0;
 
 function clearCanvas(){
   ctx.clearRect(0,0,pad.width/scale,pad.height/scale);
 }
 
+function updateFollowField(){
+  const done=$('status').value==='Terminé';
+  $('follow').disabled=done;
+  $('follow').required=false;
+  $('follow').value=done?'':$('follow').value;
+  const label=$('follow').previousElementSibling;
+  if(label) label.textContent=done?'Rappel (inutile si terminé)':'Rappel';
+  $('follow').style.background=done?'#eef2f3':'white';
+}
+$('status').addEventListener('change',updateFollowField);
+
+
+// DECOSHIP MÉTRAGE : mêmes règles de dimensions, chants, veinage et rangement que le prototype autonome.
+const coverFmt=n=>Number(n||0).toLocaleString('fr-FR',{maximumFractionDigits:0});
+function coverDimensions(x){
+  const e=Number(x.t)||0,ed=x.edges||[false,false,false,false];
+  const w=Number(x.w)||0,h=Number(x.h)||0;
+  return {a:w+(ed[2]?e:0)+(ed[3]?e:0),b:h+(ed[0]?e:0)+(ed[1]?e:0)};
+}
+function coverOrientations(x,roll){
+  const d=coverDimensions(x),opts=[];
+  if(x.grain==="vertical"){if(d.a<=roll)opts.push({across:d.a,along:d.b,rotated:false});}
+  else if(x.grain==="horizontal"){if(d.b<=roll)opts.push({across:d.b,along:d.a,rotated:true});}
+  else{
+    if(d.a<=roll)opts.push({across:d.a,along:d.b,rotated:false});
+    if(d.b<=roll&&d.b!==d.a)opts.push({across:d.b,along:d.a,rotated:true});
+  }
+  return opts;
+}
+function coverPack(roll){
+  const valid=[],errors=[];
+  editingCoverItems.forEach(x=>{const opts=coverOrientations(x,roll);if(!opts.length)errors.push(x);else valid.push({item:x,opts});});
+  if(!valid.length)return {rows:[],errors,total:0};
+  const orderings=[
+    [...valid].sort((a,b)=>Math.max(b.opts[0].across,b.opts[0].along)-Math.max(a.opts[0].across,a.opts[0].along)),
+    [...valid].sort((a,b)=>Math.min(b.opts[0].across,b.opts[0].along)-Math.min(a.opts[0].across,a.opts[0].along)),
+    [...valid].sort((a,b)=>(b.opts[0].across*b.opts[0].along)-(a.opts[0].across*a.opts[0].along)),
+    [...valid].reverse()
+  ];
+  let best=null;
+  for(const ordered of orderings){
+    const rows=[];
+    for(const entry of ordered){
+      let choice=null;
+      entry.opts.forEach(o=>rows.forEach((r,ri)=>{
+        if(r.used+o.across<=roll){
+          const increase=Math.max(r.length,o.along)-r.length;
+          const score=increase*100000+(roll-r.used-o.across);
+          if(!choice||score<choice.score)choice={ri,o,score};
+        }
+      }));
+      if(choice){const r=rows[choice.ri];r.used+=choice.o.across;r.length=Math.max(r.length,choice.o.along);r.parts.push({item:entry.item,across:choice.o.across,along:choice.o.along,rotated:choice.o.rotated});}
+      else{const o=[...entry.opts].sort((a,b)=>a.along-b.along)[0];rows.push({used:o.across,length:o.along,parts:[{item:entry.item,across:o.across,along:o.along,rotated:o.rotated}]});}
+    }
+    const total=rows.reduce((s,r)=>s+r.length,0);
+    if(!best||total<best.total)best={rows,total};
+  }
+  return {...best,errors};
+}
+function renderCoverItems(){
+  const host=$('coverItems'); if(!host)return;
+  host.innerHTML='';
+  if(!editingCoverItems.length)host.innerHTML='<div class="muted" style="padding:12px;text-align:center">Aucun élément mesuré pour ce projet.</div>';
+  editingCoverItems.forEach((x,i)=>{
+    const el=document.createElement('div');el.className='coverItem';
+    el.innerHTML=`<div class="coverItemHead"><strong>${coverEsc(x.name||'Élément '+(i+1))}</strong><button type="button" class="danger" data-cover-del="${x.id}" style="min-height:34px;padding:6px 9px;font-size:12px">Supprimer</button></div>
+    <div class="coverFields">
+      <div><label>Désignation</label><input type="text" data-cover-key="name" data-cover-id="${x.id}" value="${coverEsc(x.name||'')}"></div>
+      <div><label>Largeur façade (mm)</label><input type="number" min="0" data-cover-key="w" data-cover-id="${x.id}" value="${x.w}"></div>
+      <div><label>Hauteur façade (mm)</label><input type="number" min="0" data-cover-key="h" data-cover-id="${x.id}" value="${x.h}"></div>
+      <div><label>Épaisseur / chant (mm)</label><input type="number" min="0" data-cover-key="t" data-cover-id="${x.id}" value="${x.t}"></div>
+    </div>
+    <label>Chants à recouvrir</label><div class="coverEdges">${['Haut','Bas','Gauche','Droite'].map((n,j)=>`<label><input type="checkbox" data-cover-edge="${j}" data-cover-id="${x.id}" ${x.edges[j]?'checked':''}>${n}</label>`).join('')}</div>
+    <label>Sens du veinage / décor</label><select data-cover-key="grain" data-cover-id="${x.id}">
+      <option value="vertical" ${x.grain==='vertical'?'selected':''}>Vertical – hauteur dans le sens du rouleau</option>
+      <option value="horizontal" ${x.grain==='horizontal'?'selected':''}>Horizontal – largeur dans le sens du rouleau</option>
+      <option value="free" ${x.grain==='free'?'selected':''}>Sens indifférent – rotation autorisée</option>
+    </select>
+    <div class="coverDim">Découpe nécessaire : <b>${coverFmt(coverDimensions(x).a)} × ${coverFmt(coverDimensions(x).b)} mm</b></div>`;
+    host.appendChild(el);
+  });
+  const packed=coverPack(Math.max(1,Number($('coverRoll')?.value)||1200));
+  $('coverCount').textContent=editingCoverItems.length;
+  $('coverLinear').textContent=(packed.total/1000).toLocaleString('fr-FR',{minimumFractionDigits:2,maximumFractionDigits:2})+' m';
+  $('coverLayout').innerHTML=packed.errors.length?`⚠️ ${packed.errors.length} élément(s) trop large(s) pour le rouleau, même en rotation.`:
+    packed.rows.map((r,i)=>`<div style="padding:6px 0;border-top:1px solid #dce4e5"><b>Rangée ${i+1}</b> — ${coverFmt(r.length)} mm de longueur · ${coverFmt(r.used)} / ${coverFmt(Math.max(1,Number($('coverRoll')?.value)||1200))} mm de largeur<br>${r.parts.map(p=>`${coverEsc(p.item.name)} (${coverFmt(p.across)} × ${coverFmt(p.along)} mm${p.rotated?', tournée':''})`).join(' + ')}</div>`).join('');
+}
+function coverEsc(s){return String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
+function addCoverItem(data={}){
+  editingCoverItems.push({id:++coverSeq,name:data.name||'Élément '+(editingCoverItems.length+1),w:data.w??450,h:data.h??700,t:data.t??10,grain:data.grain||'vertical',edges:Array.isArray(data.edges)?data.edges.slice():[true,true,true,true]});
+  renderCoverItems();
+}
+function initCoverUI(){
+  const host=$('coverItems'); if(!host||host.dataset.ready)return;host.dataset.ready='1';
+  $('coverAdd').onclick=()=>addCoverItem();
+  $('coverRoll').oninput=renderCoverItems;
+  host.addEventListener('click',e=>{const id=Number(e.target.dataset.coverDel);if(id){editingCoverItems=editingCoverItems.filter(x=>x.id!==id);renderCoverItems();}});
+  host.addEventListener('change',e=>{
+    const id=Number(e.target.dataset.coverId);if(!id)return;
+    const x=editingCoverItems.find(v=>v.id===id);if(!x)return;
+    if(e.target.dataset.coverEdge!==undefined)x.edges[Number(e.target.dataset.coverEdge)]=e.target.checked;
+    else if(e.target.dataset.coverKey){const k=e.target.dataset.coverKey;x[k]=(k==='name'||k==='grain')?e.target.value:(Number(e.target.value)||0);}
+    renderCoverItems();
+  });
+  host.addEventListener('input',e=>{
+    const id=Number(e.target.dataset.coverId),k=e.target.dataset.coverKey;if(!id||!k||k==='grain')return;
+    const x=editingCoverItems.find(v=>v.id===id);if(!x)return;
+    x[k]=k==='name'?e.target.value:(Number(e.target.value)||0);
+    const dim=e.target.closest('.coverItem')?.querySelector('.coverDim');if(dim){const d=coverDimensions(x);dim.innerHTML='Découpe nécessaire : <b>'+coverFmt(d.a)+' × '+coverFmt(d.b)+' mm</b>';}
+    const packed=coverPack(Math.max(1,Number($('coverRoll')?.value)||1200));
+    $('coverLinear').textContent=(packed.total/1000).toLocaleString('fr-FR',{minimumFractionDigits:2,maximumFractionDigits:2})+' m';
+    $('coverCount').textContent=editingCoverItems.length;
+  });
+}
+
 function reset(){
+  editingCoverItems=[]; if($('coverRoll'))$('coverRoll').value=1200; renderCoverItems();
   ['name','company','boat','phone','email','project','follow','note','quoteAmount','depositAmount','invoiceAmount'].forEach(i=>$(i).value='');
   $('status').value='Demande';
+  updateFollowField();
   $('photoCamera').value='';
   $('photoLibrary').value='';
   $('photos').innerHTML='';
@@ -573,6 +743,9 @@ async function editContact(id,projectId=null,projectIndex=null){
   const p = isNewProject ? null : (editingProjectIndex!==null ? projects[editingProjectIndex] : (projectId ? projects.find(v=>String(v.id)===String(projectId)) : projects[0]));
   if(!p && projectId!==null && !isNewProject)return;
   editingPhotos=p ? (Array.isArray(p.photos)?p.photos.slice():[]) : [];
+  editingCoverItems=p && Array.isArray(p.coverItems)?JSON.parse(JSON.stringify(p.coverItems)):[];
+  if($('coverRoll'))$('coverRoll').value=p?.coverRoll||1200;
+  renderCoverItems();
   editingMaterials=p ? (Array.isArray(p.materials)?JSON.parse(JSON.stringify(p.materials)):[]) : [];
   renderMaterials();
 
@@ -585,7 +758,8 @@ async function editContact(id,projectId=null,projectIndex=null){
   $('email').value=x.email||'';
   $('project').value=p ? (p.name||'') : '';
   $('status').value=p ? normalizeStatus(p.status) : 'Demande';
-  $('follow').value=p ? (p.follow||'') : '';
+  $('follow').value=(p && normalizeStatus(p.status)!=='Terminé') ? (p.follow||'') : '';
+  updateFollowField();
   $('quoteAmount').value=p && p.quoteAmount!=='' && p.quoteAmount!=null ? p.quoteAmount : '';
   $('depositAmount').value=p && p.depositAmount!=='' && p.depositAmount!=null ? p.depositAmount : '';
   $('invoiceAmount').value=p && p.invoiceAmount!=='' && p.invoiceAmount!=null ? p.invoiceAmount : '';
@@ -616,7 +790,7 @@ $('save').onclick=async()=>{
     id:(editingProjectIndex!==null && editingProjectIndex>=0 && editingProjectId!=='__new__') ? (editingProjectId || ('p-'+Date.now())) : ('p-'+Date.now()),
     name:$('project').value.trim() || 'Projet sans nom',
     status:$('status').value,
-    follow:$('follow').value,
+    follow:$('status').value==='Terminé'?'':$('follow').value,
     quoteAmount:$('quoteAmount').value===''?'':Number($('quoteAmount').value),
     depositAmount:$('depositAmount').value===''?'':Number($('depositAmount').value),
     depositStatus:$('depositPaid').checked?'paid':'pending',
@@ -626,7 +800,9 @@ $('save').onclick=async()=>{
     drawing:noteMode==='stylus'?pad.toDataURL():'',
     noteType:noteMode,
     photos:editingPhotos.slice(),
-    materials:editingMaterials.map(m=>({name:String(m.name||'').trim(),brand:String(m.brand||'').trim(),reference:String(m.reference||'').trim(),color:String(m.color||'').trim(),length:String(m.length||'').trim(),priceTtc:String(m.priceTtc||'').trim()}))
+    materials:editingMaterials.map(m=>({name:String(m.name||'').trim(),brand:String(m.brand||'').trim(),reference:String(m.reference||'').trim(),color:String(m.color||'').trim(),length:String(m.length||'').trim(),priceTtc:String(m.priceTtc||'').trim()})),
+    coverRoll:Number($('coverRoll')?.value)||1200,
+    coverItems:editingCoverItems.map(x=>({name:String(x.name||'').trim(),w:Number(x.w)||0,h:Number(x.h)||0,t:Number(x.t)||0,grain:x.grain||'vertical',edges:Array.isArray(x.edges)?x.edges.slice():[true,true,true,true]}))
   };
 
   try{
@@ -634,19 +810,29 @@ $('save').onclick=async()=>{
       const old=await getContact(editingId);
       if(!old)return;
       const projects=Array.isArray(old.projects)?old.projects.slice():[];
-      if(editingProjectIndex!==null && editingProjectIndex>=0){
-        const idx=editingProjectIndex;
-        if(idx<0) throw new Error('Projet introuvable');
-        projects[idx]=project;
+      const editingClientOnly = editingProjectId===null && editingProjectIndex===null;
+      if(editingClientOnly){
+        // Modifier le client ne doit jamais créer un nouveau projet.
+        const updated={...old, name:$('name').value, company:$('company').value, boat:$('boat').value, phone:$('phone').value, email:$('email').value, projects};
+        await dbPut(updated);
+        alert('Fiche client modifiée');
       }else{
-        projects.push(project);
+        if(editingProjectIndex!==null && editingProjectIndex>=0){
+          const idx=editingProjectIndex;
+          if(idx<0 || idx>=projects.length) throw new Error('Projet introuvable');
+          projects[idx]={...project,id:projects[idx].id||project.id};
+        }else if(editingProjectId==='__new__'){
+          projects.push(project);
+        }else{
+          throw new Error('Projet introuvable. Aucun nouveau projet n’a été créé.');
+        }
+        const first=projects[0]||project;
+        const updated={...old, name:$('name').value, company:$('company').value, boat:$('boat').value, phone:$('phone').value, email:$('email').value, projects};
+        // Keep legacy fields synchronized with the first project for compatibility.
+        updated.project=first.name; updated.status=first.status; updated.follow=first.follow; updated.quoteAmount=first.quoteAmount; updated.depositAmount=first.depositAmount; updated.depositStatus=first.depositStatus; updated.balanceStatus=first.balanceStatus; updated.invoiceAmount=first.invoiceAmount; updated.note=first.note; updated.drawing=first.drawing; updated.noteType=first.noteType; updated.photos=first.photos; updated.materials=first.materials||[];
+        await dbPut(updated);
+        alert(editingProjectIndex!==null && editingProjectIndex>=0?'Projet modifié':'Projet ajouté au client');
       }
-      const first=projects[0]||project;
-      const updated={...old, name:$('name').value, company:$('company').value, boat:$('boat').value, phone:$('phone').value, email:$('email').value, projects};
-      // Keep legacy fields synchronized with the first project for compatibility.
-      updated.project=first.name; updated.status=first.status; updated.follow=first.follow; updated.quoteAmount=first.quoteAmount; updated.depositAmount=first.depositAmount; updated.depositStatus=first.depositStatus; updated.balanceStatus=first.balanceStatus; updated.invoiceAmount=first.invoiceAmount; updated.note=first.note; updated.drawing=first.drawing; updated.noteType=first.noteType; updated.photos=first.photos; updated.materials=first.materials||[];
-      await dbPut(updated);
-      alert(editingProjectIndex!==null && editingProjectIndex>=0?'Projet modifié':'Projet ajouté au client');
     }else{
       const obj={
         id:Date.now(),
@@ -693,7 +879,7 @@ async function render(){
   a.slice().sort((u,v)=>(Number(v.id)||0)-(Number(u.id)||0)).forEach(x=>{
     let d=document.createElement('div');
     d.className='contact';
-    const ps=x.projects||[]; const company=(x.company||'').trim(); const boat=(x.boat||'').trim(); const displayName=company || boat || 'Sans société / bateau'; const secondary=company && boat ? boat : ''; const mini=ps.map(p=>'<div class="projectMini"><div class="projectMiniTop"><div class="projectMiniName">⛵ '+esc(p.name||'Projet sans nom')+'</div><span class="projectStatus '+statusClass(normalizeStatus(p.status))+'">'+esc(normalizeStatus(p.status))+'</span></div><div class="amounts"><span class="amount">Devis <strong>'+esc(p.quoteAmount!==''&&p.quoteAmount!=null?money(p.quoteAmount):'—')+'</strong></span><span class="amount">Facture <strong>'+esc(p.invoiceAmount!==''&&p.invoiceAmount!=null?money(p.invoiceAmount):'—')+'</strong></span></div></div>').join(''); d.innerHTML='<div style="width:100%"><b>'+esc(displayName)+'</b>'+ (secondary ? '<div class="muted">'+esc(secondary)+'</div>' : '') +'<div class="muted" style="margin-top:3px">'+esc(x.phone)+' · '+ps.length+' projet(s)</div>'+mini+'</div>'; 
+    const allProjects=x.projects||[]; const ps=sf?allProjects.filter(p=>normalizeStatus(p.status)===sf):allProjects; const company=(x.company||'').trim(); const boat=(x.boat||'').trim(); const displayName=company || boat || 'Sans société / bateau'; const secondary=company && boat ? boat : ''; const mini=ps.map(p=>'<div class="projectMini"><div class="projectMiniTop"><div class="projectMiniName">⛵ '+esc(p.name||'Projet sans nom')+'</div><span class="projectStatus '+statusClass(normalizeStatus(p.status))+'">'+esc(normalizeStatus(p.status))+'</span></div><div class="amounts"><span class="amount">Devis <strong>'+esc(p.quoteAmount!==''&&p.quoteAmount!=null?money(p.quoteAmount):'—')+'</strong></span><span class="amount">Facture <strong>'+esc(p.invoiceAmount!==''&&p.invoiceAmount!=null?money(p.invoiceAmount):'—')+'</strong></span></div></div>').join(''); d.innerHTML='<div style="width:100%"><b>'+esc(displayName)+'</b>'+ (secondary ? '<div class="muted">'+esc(secondary)+'</div>' : '') +'<div class="muted" style="margin-top:3px">'+esc(x.phone)+' · '+(sf?ps.length:allProjects.length)+' projet(s)'+(sf?' dans ce statut':'')+'</div>'+mini+'</div>'; 
     d.onclick=()=>showContact(x.id);
     b.appendChild(d);
   });
@@ -726,6 +912,7 @@ function updateFinanceForm(){
 ['quoteAmount','depositAmount','depositPending','depositPaid','balancePending','balancePaid'].forEach(id=>{const el=$(id);if(el){el.addEventListener('change',updateFinanceForm);if(el.type==='number')el.addEventListener('input',updateFinanceForm);}});
 
 setFinanceChecks();
+initCoverUI();
 
 async function showContact(id){
   let x=await getContact(id);
@@ -745,6 +932,8 @@ async function showContact(id){
     h+='<div class="projectCard">'+
       '<div class="projectHead"><div><b>⛵ '+esc(p.name||'Projet sans nom')+'</b><div class="muted">'+esc(normalizeStatus(p.status))+(p.follow?' · Rappel : '+esc(p.follow):'')+'</div></div><span class="projectStatus '+statusClass(normalizeStatus(p.status))+'">'+esc(normalizeStatus(p.status))+'</span></div>'+
       '<div class="amounts financeSummary"><div><strong>💶 Suivi financier</strong></div><div>Devis : '+(p.quoteAmount!==''&&p.quoteAmount!=null?esc(money(p.quoteAmount)):'—')+'</div><div>Acompte : '+(p.depositAmount!==''&&p.depositAmount!=null?esc(money(p.depositAmount)):'—')+' &nbsp; '+(p.depositStatus==='paid'?'☑ Réglé':'☐ En attente')+'</div>'+(p.depositStatus==='paid'?'<div>Solde : '+esc(money(Math.max(0,Number(p.quoteAmount||0)-Number(p.depositAmount||0))))+' &nbsp; '+(p.balanceStatus==='paid'?'☑ Réglé':'☐ En attente')+'</div>':'')+'<div>Total facture : '+(p.invoiceAmount!==''&&p.invoiceAmount!=null?esc(money(p.invoiceAmount)):'—')+'</div></div>'+
+
+      (Array.isArray(p.coverItems)&&p.coverItems.length?'<div class="materialSummary"><div class="materialSummaryTitle">📐 Métrage des panneaux / portes</div><div class="materialSummaryRow">Rouleau : '+esc(p.coverRoll||1200)+' mm · Éléments : '+p.coverItems.length+'</div>'+p.coverItems.map((m,i)=>'<div class="materialSummaryRow"><strong>'+esc((i+1)+'. '+(m.name||'Élément'))+'</strong><br>Façade : '+esc(m.w)+' × '+esc(m.h)+' mm · Chant : '+esc(m.t)+' mm · Veinage : '+esc(m.grain==='vertical'?'Vertical':m.grain==='horizontal'?'Horizontal':'Indifférent')+'<br>Chants : '+esc((m.edges||[]).map((v,j)=>v?['Haut','Bas','Gauche','Droite'][j]:null).filter(Boolean).join(', ')||'Aucun')+'</div>').join('')+'<div class="materialSummaryRow"><strong>Métrage estimé : '+(function(){const saved=editingCoverItems;editingCoverItems=p.coverItems.map((v,i)=>({...v,id:i+1}));const z=coverPack(Number(p.coverRoll)||1200).total/1000;editingCoverItems=saved;return z.toLocaleString('fr-FR',{minimumFractionDigits:2,maximumFractionDigits:2})+' m';})()+'</strong></div></div>':'')+
       (p.note?'<div class="detailValue" style="margin-top:9px">'+esc(p.note)+'</div>':'')+
       '<div class="materialSummary"><div class="materialSummaryTitle">🧴 Matières / adhésifs utilisés</div>'+(Array.isArray(p.materials)&&p.materials.length?p.materials.map((m,i)=>'<div class="materialSummaryRow"><strong>'+esc((i+1)+'. '+(m.name||'Matière sans nom'))+'</strong><br>Marque : '+esc(m.brand||'—')+' · Référence : '+esc(m.reference||'—')+' · Couleur : '+esc(m.color||'—')+'<br>Longueur : '+esc(m.length||'—')+' m · Prix TTC : '+esc(m.priceTtc?money(m.priceTtc):'—')+'</div>').join(''):'<div class="muted">Aucune matière renseignée pour ce projet.</div>')+'</div>'+
       (p.photos&&p.photos.length?'<div class="detailPhotos">'+p.photos.map(src=>'<img src="'+src+'">').join('')+'</div>':'')+
@@ -753,7 +942,7 @@ async function showContact(id){
       '</div>';
   });
 
-  h+='<div class="editbar"><button class="alt" onclick="editContact('+x.id+')">✏️ Modifier le client</button><button class="alt" onclick="view(\'list\')">← Contacts</button></div>';
+  h+='<div class="editbar"><button class="alt" onclick="editContact('+x.id+')">✏️ Modifier le client</button><button class="alt" onclick="view(\'list\')">← Contacts</button><button class="danger" style="grid-column:1/-1" onclick="deleteContact('+x.id+')">🗑️ Supprimer le contact</button></div>';
   $('detailBox').innerHTML=h;
   view('detail');
 }
@@ -806,6 +995,24 @@ initPhotoViewer();
 
 function newProject(id){
   editContact(id,'__new__');
+}
+
+async function deleteContact(contactId){
+  const x=await getContact(contactId);
+  if(!x)return;
+  const name=x.name||x.company||x.boat||'ce contact';
+  const count=Array.isArray(x.projects)?x.projects.length:0;
+  if(!confirm('Supprimer définitivement le contact « '+name+' » et ses '+count+' projet(s) ?\n\nCette suppression sera synchronisée avec les autres appareils et ne pourra pas être annulée.'))return;
+  try{
+    await dbDelete(contactId);
+    if(window.refreshPlanning)await window.refreshPlanning();
+    await render();
+    view('list');
+    alert('Contact supprimé.');
+  }catch(e){
+    console.error('Suppression contact:',e);
+    alert('La suppression a échoué. Vérifie la connexion puis réessaie.');
+  }
 }
 
 async function deleteProject(contactId, projectIndex){
@@ -863,8 +1070,7 @@ $('restoreFile').onchange=async(e)=>{
   const months=['Janvier','Février','Mars','Avril','Mai','Juin','Juillet','Août','Septembre','Octobre','Novembre','Décembre'];
   const days=['Lun','Mar','Mer','Jeu','Ven','Sam','Dim'];
   const colors={
-    'Demande':'#2196f3','Devis':'#ff9800','En attente':'#9c27b0','Accepté':'#2e7d32',
-    'Acompte':'#00838f','À produire':'#1565c0','À poser':'#00897b','À facturer':'#e53935'
+    'Demande':'#2196f3','Rendez-vous':'#e53935','En attente':'#9c27b0','Terminé':'#455a64','À produire/poser':'#00897b'
   };
   function keyFromDate(v){
     if(!v)return null;
@@ -905,6 +1111,7 @@ $('restoreFile').onchange=async(e)=>{
       const todayKey=new Date().toISOString().slice(0,10);
       for(const c of contacts||[]){
         for(const p of (Array.isArray(c.projects)?c.projects:[])){
+          if(normalizeStatus(p.status)==='Terminé')continue;
           const dateKey=keyFromDate(p.follow);
           if(!dateKey)continue;
           const company=(c.company||'').trim();
@@ -969,6 +1176,94 @@ $('restoreFile').onchange=async(e)=>{
     console.error('Initialisation stockage:',e);
   }
 })();
+
+/* =========================
+   CLOUDFLARE D1 API
+   ========================= */
+let apiBase='';
+let apiToken='';
+let syncBusy=false;
+const API_CFG='decoship_cloudflare_api_config';
+function setCloudState(msg,ok=false){const el=$('configState');if(el){el.textContent=msg;el.style.color=ok?'#2e7d32':'#b3261e';}}
+function setLoginState(msg,ok=false){const el=$('loginState');if(el){el.textContent=msg;el.style.color=ok?'#2e7d32':'#b3261e';}}
+function savedApiCfg(){try{return JSON.parse(localStorage.getItem(API_CFG)||'null')}catch(e){return null}}
+function saveApiCfg(){
+  const url=$('apiUrl').value.trim().replace(/\/+$/,'');
+  const token=$('apiToken').value.trim();
+  if(!/^https:\/\/[a-z0-9.-]+\.workers\.dev$/i.test(url)){setCloudState('❌ Vérifie l’adresse Cloudflare Workers.');return false;}
+  if(token.length<20){setCloudState('❌ Le code d’accès doit comporter au moins 20 caractères.');return false;}
+  apiBase=url;apiToken=token;
+  localStorage.setItem(API_CFG,JSON.stringify({url,token}));
+  setCloudState('Adresse et code enregistrés sur cet appareil.',true);return true;
+}
+async function apiFetch(path,options={}){
+  const headers={...(options.headers||{}),'Authorization':'Bearer '+apiToken};
+  if(options.body!==undefined) headers['Content-Type']='application/json';
+  const res=await fetch(apiBase+path,{...options,headers});
+  const body=await res.json().catch(()=>({}));
+  if(!res.ok) throw new Error(body.error||('Erreur API HTTP '+res.status));
+  return body;
+}
+async function cloudRows(){if(!apiToken)return [];const body=await apiFetch('/contacts');return body.contacts||[];}
+async function pullCloud(){
+  if(!apiToken||syncBusy)return 0; syncBusy=true;
+  try{
+    const rows=await cloudRows();
+    const current=await getContacts();
+    const localById=new Map(current.map(c=>[String(c.id),c]));
+    const remoteIds=new Set(rows.map(r=>String(r.id)));
+    /* Première connexion : conserve les fiches déjà présentes sur cet appareil en les envoyant au Cloud si elles n'y sont pas encore. */
+    for(const local of current){
+      if(local && local.id!=null && !remoteIds.has(String(local.id))){
+        await pushCloud(local);
+        remoteIds.add(String(local.id));
+      }
+    }
+    let changed=0;
+    for(const row of rows){
+      if(!row||row.data==null)continue;
+      const remote=row.data;
+      const local=localById.get(String(remote.id));
+      const remoteStamp=String(row.updated_at||remote.updatedAt||'');
+      const localStamp=String(local?.updatedAt||local?.updated_at||'');
+      if(!local||remoteStamp>localStamp){await localDbPut({...remote,_remoteId:String(row.id),updatedAt:remoteStamp||remote.updatedAt});changed++;}
+    }
+    await render();if(window.refreshPlanning)await window.refreshPlanning();
+    return changed;
+  } finally {syncBusy=false;}
+}
+async function pushCloud(contact){
+  if(!apiToken)return contact;
+  const updatedAt=new Date().toISOString();
+  const payload={...contact,updatedAt};
+  const result=await apiFetch('/contacts/'+encodeURIComponent(String(contact.id)),{method:'PUT',body:JSON.stringify({data:payload})});
+  return {...payload,_remoteId:String(result.id||contact.id)};
+}
+async function cloudDelete(contact){if(!apiToken||!contact)return;await apiFetch('/contacts/'+encodeURIComponent(String(contact.id)),{method:'DELETE'});}
+async function dbPut(contact){
+  await localDbPut(contact);
+  if(apiToken){try{const synced=await pushCloud(contact);if(synced._remoteId)await localDbPut(synced);}catch(e){console.error('Synchronisation Cloudflare:',e);setLoginState('⚠️ Fiche enregistrée sur cet appareil, synchronisation cloud impossible : '+e.message);}}
+}
+async function dbDelete(id){const c=await getContact(id);await localDbDelete(id);if(c&&apiToken){try{await cloudDelete(c);}catch(e){console.error(e);setLoginState('⚠️ Suppression locale effectuée, mais échec cloud : '+e.message);}}}
+async function connectApi(){
+  if(!saveApiCfg())return;
+  setLoginState('Connexion et lecture des données en cours…');
+  try{
+    await apiFetch('/health');
+    const changed=await pullCloud();
+    $('cloudOverlay').style.display='none';
+    setLoginState('✅ Cloudflare connecté. Fiches récupérées : '+changed,true);
+    alert('Connexion Cloudflare réussie. '+changed+' fiche(s) récupérée(s).');
+  }catch(e){setLoginState('❌ Connexion impossible : '+e.message+' — vérifie que le Worker est déployé et que son code d’accès correspond.');}
+}
+$('connectApi').onclick=connectApi;
+(function bootCloudflare(){
+  const cfg=savedApiCfg();
+  if(cfg){$('apiUrl').value=cfg.url||$('apiUrl').value;$('apiToken').value=cfg.token||'';apiBase=cfg.url||'';apiToken=cfg.token||'';}
+})();
+/* Relecture périodique légère pour actualiser les autres appareils. */
+setInterval(async()=>{if(apiToken&&!document.hidden){try{await pullCloud();}catch(e){console.warn('Actualisation cloud:',e);}}},60000);
+
 </script>
 </body>
 </html>
