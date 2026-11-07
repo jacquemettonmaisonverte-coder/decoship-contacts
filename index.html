@@ -1457,48 +1457,60 @@ async function dbPut(contact){
   if(apiToken){try{const synced=await pushCloud(contact);if(synced._remoteId)await localDbPut(synced);}catch(e){console.error('Synchronisation Cloudflare:',e);setLoginState('⚠️ Fiche enregistrée sur cet appareil, synchronisation cloud impossible : '+e.message);}}
 }
 async function dbDelete(id){const c=await getContact(id);await localDbDelete(id);if(c&&apiToken){try{await cloudDelete(c);}catch(e){console.error(e);setLoginState('⚠️ Suppression locale effectuée, mais échec cloud : '+e.message);}}}
-async function loadMaterialCatalog(){
-  try{const r=await apiFetch('/materials');materialCatalog=Array.isArray(r.materials)?r.materials:[];localStorage.setItem(MATERIAL_CACHE,JSON.stringify(materialCatalog));}
-  catch(e){try{materialCatalog=JSON.parse(localStorage.getItem(MATERIAL_CACHE)||'[]');}catch(_){materialCatalog=[];}throw e;}
-}
-async function seedMaterialCatalogIfEmpty(){
-  const r=await apiFetch('/materials');
-  if(!Array.isArray(r.materials)||r.materials.length===0){
-    await apiFetch('/materials/import',{method:'POST',body:JSON.stringify({materials:DECOSHIP_MATERIAL_SEED})});
+function loadMaterialCatalogLocal(){
+  try{
+    const cached=JSON.parse(localStorage.getItem(MATERIAL_CACHE)||'null');
+    materialCatalog=Array.isArray(cached)&&cached.length
+      ? cached
+      : (Array.isArray(DECOSHIP_MATERIAL_SEED)?DECOSHIP_MATERIAL_SEED:[]);
+    localStorage.setItem(MATERIAL_CACHE,JSON.stringify(materialCatalog));
+  }catch(e){
+    materialCatalog=Array.isArray(DECOSHIP_MATERIAL_SEED)?DECOSHIP_MATERIAL_SEED:[];
   }
-  await loadMaterialCatalog();
 }
 async function connectApi(){
   if(!saveApiCfg())return;
-  setLoginState('Connexion et lecture des données en cours…');
+  loadMaterialCatalogLocal();
+  setLoginState('Connexion à Cloudflare et lecture des fiches en cours…');
   try{
-    await apiFetch('/health');
-    await seedMaterialCatalogIfEmpty();
+    const health=await apiFetch('/health');
+    if(!health.ok)throw new Error('Réponse de contrôle Cloudflare invalide.');
     const changed=await pullCloud();
     $('cloudOverlay').style.display='none';
     setLoginState('✅ Cloudflare connecté. Fiches récupérées : '+changed,true);
     alert('Connexion Cloudflare réussie. '+changed+' fiche(s) récupérée(s).');
-  }catch(e){setLoginState('❌ Connexion impossible : '+e.message+' — vérifie que le Worker est déployé et que son code d’accès correspond.');}
-}
-$('connectApi').onclick=connectApi; // désactivé visuellement en mode test local
-(function bootLocalTest(){
-  // V16 TEST LOCALE : aucune connexion Cloudflare et aucune écriture distante.
-  // Le catalogue embarqué est chargé localement pour tester l'interface.
-  apiBase='';
-  apiToken='';
-  try {
-    materialCatalog = Array.isArray(DECOSHIP_MATERIAL_SEED) ? DECOSHIP_MATERIAL_SEED : [];
-    localStorage.setItem(MATERIAL_CACHE, JSON.stringify(materialCatalog));
-  } catch(e) {
-    try { materialCatalog = JSON.parse(localStorage.getItem(MATERIAL_CACHE) || '[]'); }
-    catch(_) { materialCatalog = []; }
+  }catch(e){
+    apiBase='';
+    apiToken='';
+    setLoginState('❌ Connexion impossible : '+e.message+' — vérifie le code d’accès et la configuration du Worker.');
   }
-  const overlay = $('cloudOverlay');
-  if (overlay) overlay.style.display = 'none';
-  const notice = document.createElement('div');
-  notice.textContent = 'V19.8 — MODE TEST LOCAL — catalogue chargé sur cet appareil • aucune synchronisation Cloudflare';
-  notice.style.cssText = 'position:sticky;top:0;z-index:9999;background:#fff0d8;color:#805018;border-bottom:1px solid #e6c58d;padding:8px 12px;text-align:center;font-size:12px;font-weight:700';
-  document.body.insertBefore(notice, document.body.firstChild);
+}
+$('connectApi').onclick=connectApi;
+(function bootCloudflare(){
+  loadMaterialCatalogLocal();
+  const overlay=$('cloudOverlay');
+  const cfg=savedApiCfg();
+  if(!cfg||!cfg.url||!cfg.token){
+    if(overlay)overlay.style.display='flex';
+    setLoginState('Entre ton adresse Cloudflare et ton code d’accès pour synchroniser.');
+    return;
+  }
+  apiBase=String(cfg.url).replace(/\/+$/,'');
+  apiToken=String(cfg.token);
+  (async()=>{
+    try{
+      const health=await apiFetch('/health');
+      if(!health.ok)throw new Error('Réponse de contrôle Cloudflare invalide.');
+      const changed=await pullCloud();
+      if(overlay)overlay.style.display='none';
+      setLoginState('✅ Cloudflare connecté. Fiches récupérées : '+changed,true);
+    }catch(e){
+      apiBase='';
+      apiToken='';
+      if(overlay)overlay.style.display='flex';
+      setLoginState('⚠️ Reconnexion automatique impossible : '+e.message+' — reconnecte-toi.');
+    }
+  })();
 })();
 /* Relecture périodique légère pour actualiser les autres appareils. */
 setInterval(async()=>{if(apiToken&&!document.hidden){try{await pullCloud();}catch(e){console.warn('Actualisation cloud:',e);}}},60000);
