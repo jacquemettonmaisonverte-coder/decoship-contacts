@@ -1507,8 +1507,8 @@ $('connectApi').onclick=connectApi;
     }catch(e){
       apiBase='';
       apiToken='';
-      if(overlay)overlay.style.display='flex';
-      setLoginState('⚠️ Reconnexion automatique impossible : '+e.message+' — reconnecte-toi.');
+      if(overlay)overlay.style.display='none';
+      setLoginState('⚠️ Cloudflare indisponible : '+e.message+'. DECOSHIP reste accessible en mode local ; les fiches enregistrées sur cet appareil sont conservées.');
     }
   })();
 })();
