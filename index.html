@@ -1469,6 +1469,26 @@ function loadMaterialCatalogLocal(){
     materialCatalog=Array.isArray(DECOSHIP_MATERIAL_SEED)?DECOSHIP_MATERIAL_SEED:[];
   }
 }
+
+/* Synchronisation indépendante du catalogue matières avec Cloudflare. */
+async function syncMaterialCatalog(){
+  if(!apiToken)return;
+  const remote=await apiFetch('/materials');
+  const remoteMaterials=Array.isArray(remote.materials)?remote.materials:[];
+  if(remoteMaterials.length){
+    materialCatalog=remoteMaterials;
+    localStorage.setItem(MATERIAL_CACHE,JSON.stringify(materialCatalog));
+    return {count:materialCatalog.length,source:'cloud'};
+  }
+  if(Array.isArray(materialCatalog)&&materialCatalog.length){
+    const imported=await apiFetch('/materials/import',{
+      method:'POST',
+      body:JSON.stringify({materials:materialCatalog})
+    });
+    return {count:imported.imported||materialCatalog.length,source:'initial'};
+  }
+  return {count:0,source:'empty'};
+}
 async function connectApi(){
   if(!saveApiCfg())return;
   loadMaterialCatalogLocal();
@@ -1477,9 +1497,10 @@ async function connectApi(){
     const health=await apiFetch('/health');
     if(!health.ok)throw new Error('Réponse de contrôle Cloudflare invalide.');
     const changed=await pullCloud();
+    const catalog=await syncMaterialCatalog();
     $('cloudOverlay').style.display='none';
-    setLoginState('✅ Cloudflare connecté. Fiches récupérées : '+changed,true);
-    alert('Connexion Cloudflare réussie. '+changed+' fiche(s) récupérée(s).');
+    setLoginState('✅ Cloudflare connecté. Fiches récupérées : '+changed+' • Catalogue : '+catalog.count+' références',true);
+    alert('Connexion Cloudflare réussie. '+changed+' fiche(s) récupérée(s). Catalogue : '+catalog.count+' références.');
   }catch(e){
     apiBase='';
     apiToken='';
