@@ -97,6 +97,12 @@ canvas{width:100%;height:250px;border:2px dashed #c8d8da;border-radius:14px;back
     <input id="apiToken" type="password" placeholder="Code configuré dans Cloudflare" autocomplete="current-password">
     <div style="font-size:12px;color:#6e858a;margin:-5px 0 10px">Le code d’accès est mémorisé sur cet appareil après la connexion.</div>
     <button id="connectApi" style="width:100%;margin:8px 0 14px">🔐 Connecter et synchroniser</button>
+    <div style="border-top:1px solid #e4ebeb;padding-top:12px;margin-top:4px">
+      <div style="font-weight:700;font-size:13px;margin-bottom:6px">Catalogue matières DECOSHIP</div>
+      <input id="materialJsonFile" type="file" accept=".json,application/json" style="display:none">
+      <button id="importMaterialJson" type="button" class="alt" style="width:100%">📥 Importer le catalogue complet (JSON)</button>
+      <div id="materialImportState" style="font-size:12px;color:#6e858a;margin-top:7px">À utiliser après la connexion Cloudflare. L'import remplace uniquement le catalogue matières, jamais les fiches clients.</div>
+    </div>
     <div id="configState" style="font-size:13px;margin-bottom:14px"></div>
     <div id="loginState" style="font-size:13px;margin-top:8px"></div>
   </div>
@@ -1508,6 +1514,36 @@ async function connectApi(){
   }
 }
 $('connectApi').onclick=connectApi;
+
+$('importMaterialJson').onclick=()=> {
+  if(!apiToken || !apiBase){
+    $('materialImportState').textContent='Connecte-toi d’abord à Cloudflare avec ton code DECOSHIP.';
+    return;
+  }
+  $('materialJsonFile').click();
+};
+$('materialJsonFile').addEventListener('change', async (event)=>{
+  const file=event.target.files && event.target.files[0];
+  if(!file)return;
+  const state=$('materialImportState');
+  try{
+    if(file.size>500000)throw new Error('Fichier trop volumineux.');
+    const parsed=JSON.parse(await file.text());
+    if(!Array.isArray(parsed)||parsed.length===0)throw new Error('Le fichier ne contient pas de catalogue valide.');
+    if(parsed.length!==370)throw new Error('Le fichier doit contenir les 370 références attendues. Références trouvées : '+parsed.length+'.');
+    if(!confirm('Importer '+parsed.length+' références dans Cloudflare ? Cela remplacera uniquement le catalogue matières distant. Les fiches clients ne seront pas modifiées.'))return;
+    state.textContent='Import des '+parsed.length+' références en cours…';
+    const result=await apiFetch('/materials/import',{method:'POST',body:JSON.stringify({materials:parsed})});
+    materialCatalog=parsed;
+    localStorage.setItem(MATERIAL_CACHE,JSON.stringify(materialCatalog));
+    state.textContent='✅ Catalogue importé dans Cloudflare : '+(result.imported||parsed.length)+' références.';
+    setLoginState('✅ Catalogue matières mis à jour sur Cloudflare.',true);
+  }catch(error){
+    state.textContent='❌ Import impossible : '+error.message;
+  }finally{
+    event.target.value='';
+  }
+});
 $('cloudReconnect').onclick=()=>{
   $('apiUrl').value=apiBase||'https://decoship-photos-api.jacquemettonmaisonverte.workers.dev';
   $('apiToken').value='';
